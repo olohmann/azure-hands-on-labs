@@ -1,0 +1,9 @@
+title: Azure Hands on Labs Theme
+description: "A theme for Azure Hands-on-Labs."
+repository: olohmann/azure-hands-on-labs
+markdown: kramdown
+kramdown:
+   syntax_highlighter_opts:
+      disable : true
+sass:
+  style: :compressed

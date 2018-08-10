@@ -1,0 +1,56 @@
+nav.navbar-azure-hol {
+    background-color: #2b3137;
+    border-color: #1f2327;
+}
+
+.azure-hol-background {
+    background-color: #48a0b8;
+}
+
+article.workshop {
+    h1 {
+        display: none;
+    }
+}
+
+.hero-content {
+    padding: 35px 15px;
+    color: #fff;
+    font-family: "Segoe UI Light", "Segoe UI", Tahoma, Arial, sans-serif;
+    font-weight: 400;
+    h1 {
+        margin: 0 0 16px;
+        font-size: 30pt;
+        line-height: 32pt;
+    }
+    p {
+        margin: 10px 0 6px;
+        font-size: 13pt;
+        line-height: 15pt;
+    }
+    ul {
+        li {
+            margin: 10px 0 6px;
+            font-size: 13pt;
+            line-height: 15pt;
+            a {
+                color: white;
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+.text-azure-hol {
+    color: #00bcf2;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 20px;
+    float: left;
+    height: 50px;
+    padding: 15px 0;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 50px;
+    background-position: 0 5px;
+}
