@@ -1,5 +1,5 @@
-title: Azure Hands on Labs Theme
-description: "A theme for Azure Hands-on-Labs."
+title: Azure Hands on Labs
+description: "A set of simple Azure Hands-on-Labs."
 repository: olohmann/azure-hands-on-labs
 markdown: kramdown
 kramdown:
