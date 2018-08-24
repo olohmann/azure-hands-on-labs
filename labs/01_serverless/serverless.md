@@ -103,7 +103,7 @@ In this exercise, you will create an App Service Plan and an Azure Function App 
 
      ![Adding a container](./media/add-container.png)
 
-1. Repeat Step 13 to add containers named "accepted" and "rejected" to blob storage.
+1. Repeat Step 4 to add containers named "accepted" and "rejected" to blob storage.
 
 1. Confirm that all three containers were added to blob storage.
 
