@@ -8,7 +8,8 @@ layout: home
 
 1. [Serverless with Azure Functions](./labs/01_serverless/serverless.md)
 1. [Introduction to IoT on Azure](./labs/02_iot/iot.md)
-1. [Introduction to Containers and AKS](./labs/03_containers_and_aks/containers_and_aks.md)
+1. [Introduction to Terraform on Azure](./labs/03_terraform/terraform.md)
+1. [Introduction to Containers and AKS](./labs/04_containers_and_aks/containers_and_aks.md)
 
 ## Acknowledgements
 

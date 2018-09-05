@@ -1,4 +1,4 @@
-# Introducation to Containers and AKS
+# Introduction to Containers and AKS
 
 ## Overview
 
