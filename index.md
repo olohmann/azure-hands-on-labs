@@ -2,7 +2,7 @@
 layout: home
 ---
 
-# Introdcution
+# Introduction
 
 ## Labs
 
