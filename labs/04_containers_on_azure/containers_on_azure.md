@@ -118,3 +118,80 @@ For a start, we will be running a very powerful and lightweight web server calle
     ```bash
     curl http://<container ip>
     ```
+
+## Exercise 3: Create and containerize a .NET Core Web App
+
+Now that we know how to run a pre-packaged app from a public container registry like Docker Hub, we would like to see the same for our own applications. We will create a new .NET Core app (no coding required) and put that into a container image like the nginx image we used in the preceding exercise.
+
+1. First we need to clean up, because we will want to reuse port 80, on which the container from the last exercise is still listening. (**CAUTION:** This will silently remove ALL running and non-running containers):
+
+    ```bash
+    docker container rm -f $(docker container ls -a -q)
+    ```
+    This command consists of two parts: `docker container ls` within the brackets lists all (`-a` flag) containers with only their IDs (`-q` flag). `docker container rm` then takes all these IDs and removes the containers, even if they are still running (`-f`).
+
+1. Now let's create our .NET Core Web App. That's easy:
+
+    ```bash
+    mkdir myapp
+    cd myapp
+    dotnet new mvc
+    ```
+    This creates a new directory, into which we navigate with `cd` and then use `dotnet new mvc` to initiate a web application with the same name as the directory (see [this article](https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app-xplat/start-mvc?view=aspnetcore-2.1) to learn more about this process).
+
+    For a first test of the application, let's run it:
+
+    ```bash
+    dotnet run
+    ```
+    This will run the application in .NET Core's own web server (called Kestrel) and listen on port 5000 (Would like to let this run on port 80 as well to be able to navigate to it with a browser, but that currently would be more effort due to [this issue](https://github.com/aspnet/MetaPackages/issues/264)). If everything is ok, Kestrel will tell us that it is now listening at two development ports:
+
+    ```
+    Using launch settings from /home/...
+    [...]
+    Now listening on: https://localhost:5001
+    Now listening on: http://localhost:5000
+    Application started. Press Ctrl+C to shut down.
+    ```
+    Press `Ctrl+C` to stop the application.
+
+1. To actually put it in a container, we first need to 'publish' the application into a deployable package:
+
+    ```bash
+    dotnet publish -o package
+    ```
+    This compiles the application and puts it into the folder 'package'. 
+
+1. To put the packaged app into a container image, we now need to create a so called 'Dockerfile'. Type:
+
+    ```bash
+    nano Dockerfile
+    ```
+
+    This creates an empty file with the name 'Dockerfile' and opens the nano text editor to edit the file. Copy and paste the following text into the text editor:
+
+    ```Dockerfile
+    FROM microsoft/dotnet:2.1-aspnetcore-runtime
+    WORKDIR /app
+    COPY package .
+    ENTRYPOINT ["dotnet", "myapp.dll"]
+    ```
+
+    Save the text with `Ctrl+O` and exit nano with `Ctrl+X`.
+
+1. Build the Dockerfile with:
+
+    ```bash
+    docker image build --tag myappimage .
+    ```
+
+1. Run the image as a container:
+
+    ```bash
+    docker container run --name myapp -d -p 80:80 myappimage
+    ```
+
+1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address of your VM (the same you used to log on the machine in the beginnning) as `http://<machine address>`:
+
+   ![The web app served from our container](./media/dotnetcoreapp.png)
+
