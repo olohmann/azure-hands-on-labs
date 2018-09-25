@@ -195,7 +195,7 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
    ![The web app served from our container](./media/dotnetcoreapp.png)
 
-## **Optional** Exercise 3.a: Upgrade Dockerfile to use multi stage build
+##  Exercise 3.a: **Optional**: Upgrade Dockerfile to use multi stage build
 
 [Skip for now]
 
