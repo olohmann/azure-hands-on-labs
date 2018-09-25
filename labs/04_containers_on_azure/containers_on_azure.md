@@ -273,3 +273,26 @@ Now that we know how to run a pre-packaged app from a public container registry 
 1. To see our image in the registry, in the Azure portal, navigate to our newly created registry: Type your registry's name in the search bar at the top of the portal, click it. Click **Repositories** on the left, choose the **'myappimage'** repository and click the **'v1.0'** tag.). There you might want to expand the **Manifest** to see the structure of our app container image. 
 
 Now we are ready to deploy to any Azure service from our registry.
+
+## Exercise 5: Deploy to Azure Container Instances (ACI)
+
+1. [Coming soon]
+
+
+## Exercise 6: Deploy to Azure App Service
+
+1. Try it:
+
+    ```bash
+    az appservice plan create --name myappserviceplan --resource-group <resource group> --sku B1 --is-linux
+    az webapp create --resource-group <resource group> --plan myaappserviceplan --name myappserviceapp --deployment-container-image-name <registry name>.azurecr.io/myappimage:v1.0
+    az webapp config appsettings set --resource-group <resource group> --name myappserviceapp --settings WEBSITES_PORT=80
+    az webapp config container set --name myappserviceapp --resource-group <resource group> --docker-custom-image-name <registry name>.azurecr.io/myappimage:v1.0 --docker-registry-server-url https://<registry name>.azurecr.io --docker-registry-server-user <registry user> --docker-registry-server-password <registry password>
+    az webapp update -g <resource group> -n myappserviceapp --https-only true
+    ```
+
+## Summary
+
+We now have everything in place to containerize and deploy applications to Azure. The start of everything is the Dockerfile, representing the gateway from out there in the wild into the new world of containers, where our app will always run in its own beatiful isolated space. The foundation for any deployment of containers to a production platform is having a container registry, like the ACR we created.
+
+Finally, the deployment methods to App Service (for web apps, utilizing the battle tested features of App Service like integrated Authentication or SSL support) or Azure Container Instances (more lightweigt and flexible) represent production ready runtime options for **single**-container applications. **Multi**-container applications (e.g. any microservice application) require more, they need *orchestration*, a concept that nowadays we typically address by using an orchestration service like Kubernetes. This will be the topic of our next lab!
