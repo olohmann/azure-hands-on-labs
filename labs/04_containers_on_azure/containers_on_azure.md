@@ -195,3 +195,81 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
    ![The web app served from our container](./media/dotnetcoreapp.png)
 
+## **Optional** Exercise 3.a: Upgrade Dockerfile to use multi stage build
+
+[Skip for now]
+
+1. Dockerfile:
+```Dockerfile
+   # Stage 1
+   FROM microsoft/dotnet:2.1-sdk AS builder
+   WORKDIR /source
+
+   # caches restore result by copying csproj file separately
+   COPY *.csproj .
+   RUN dotnet restore
+
+   # copies the rest of the code
+   COPY . .
+   RUN dotnet publish --output package --configuration Release
+
+   # Stage 2
+   FROM microsoft/dotnet:2.1-aspnetcore-runtime
+   WORKDIR /app
+   COPY --from=builder /source/package .
+   ENTRYPOINT ["dotnet", "myapp.dll"]
+``` 
+
+## Exercise 4: Create Azure Container Registry (ACR) and push image
+
+1. Open the Cloud Shell (in case you are stilled logged into the VM, just type `exit` and you should be back).
+
+1. Create an ACR with Azure CLI:
+
+   ```bash
+   az acr create --name <registry name> --resource-group <resource group> --sku basic
+   ```
+
+    Where...
+    *  `<registry name>` is a name that you can freely choose, but that must still be available as `<registry name>.azurecr.io`.
+    *  `<resorce group>` is the name of the rexource group that you have contributor permissions to (when in doubt, ask your instructor).
+
+    Now we have our own private registry running in Azure available at `<registry name>.azurecr.io`. But we cannot yet access it from our machine. To enable this:
+
+   ```bash
+    az acr update --n <registry name> -g <resource group> --admin-enabled true
+    az acr credential show -n <registry name> -g <resource group>
+    ```
+    Note the password and username.
+
+1. Log in to the Docker VM again with:
+
+    ```bash
+    ssh <user>@<machine adress> 
+    ```
+    For example:
+    ```bash
+    ssh Carsten@cadullcontlablin.westeurope.cloudapp.azure.com 
+    ```
+
+1. Now we can log in with docker into our registry (replace `<registry name>` with your registry's name):
+
+    ```bash
+    docker login <registry name>.azurecr.io
+    ```
+    You will be prompted for username and password - enter the credentials noted in the previous step.
+
+1. If we are successfully logged in, we can now push our image 'myappimage' (from the previous exercise) to the registry. The registry an image is pulled from or pushed to is always encoded in its image tag. Thus, to push to our own registry, we first need to tag our image:
+
+    ```bash
+    docker image tag myappimage <registry name>.azurecr.io/myappimage:v1.0
+    ```
+1. Now we can finally push:
+
+    ```bash
+    docker image push <registry name>.azurecr.io/myappimage:v1.0
+    ```
+
+1. To see our image in the registry, in the Azure portal, navigate to our newly created registry: Type your registry's name in the search bar at the top of the portal, click it. Click **Repositories** on the left, choose the **'myappimage'** repository and click the **'v1.0'** tag.). There you might want to expand the **Manifest** to see the structure of our app container image. 
+
+Now we are ready to deploy to any Azure service from our registry.
