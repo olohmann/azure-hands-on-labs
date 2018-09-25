@@ -49,7 +49,7 @@ Estimated time to complete this lab: **90-120** minutes.
 
    ![Start Azure Cloud Shell](./media/portalopenconsole.png)
 
-In case you have not worked with the Azure Cloud Shell before, you will be asked a few questions. Click **Bash (Linux)** and **Create Storage**, accept all defaults. Your console should then look like this:
+    In case you have not worked with the Azure Cloud Shell before, you will be asked a few questions. Click **Bash (Linux)** and **Create Storage**, accept all defaults. Your console should then look like this:
 
    ![Ready Azure Cloud Shell](./media/portalconsoleready.png)
 
