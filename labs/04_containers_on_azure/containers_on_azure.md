@@ -55,12 +55,14 @@ Estimated time to complete this lab: **90-120** minutes.
 
 1. Log on to the machine with the user and machine address provided by your instructor, by typing the following command into the cloud shell:
 
-    ```bash
+    ```sh
     ssh <user>@<machine adress> 
     ```
+
     For example:
-    ```bash
-    ssh Carsten@cadullcontlablin.westeurope.cloudapp.azure.com 
+
+    ```sh
+    ssh labuser29@labuser29-xxxx.westeurope.cloudapp.azure.com
     ```
     (Pasting into the cloud shell will likely require using the browser's context menu. Thus, if it does not work, try a right click into the console with your mouse)
 
@@ -68,9 +70,9 @@ Estimated time to complete this lab: **90-120** minutes.
 
     After this login succeeds, we have a bash shell running right in the Linux VM, in which we will work with Docker.
 
-1. To test, whether Docker is indeed installed, type:
+1. To test whether Docker is indeed installed type:
 
-    ```bash
+    ```sh
     docker --version 
     ```
     This should display the docker version.
@@ -81,30 +83,37 @@ For a start, we will be running a very powerful and lightweight web server calle
 
 1. We will tell docker to pull the nginx image from Docker Hub and let it run in our docker engine with a single command. Type:
 
-    ```bash
+    ```sh
     docker container run --name mynginx -d nginx
     ```
+
     The `-d` flag in the command tells Docker that the container should run detached, in the background. We do not currently want to interact with it directly. We just want it to run silently with default settings, listening on its default port.
 
 1.  The engine just reports a lengthy id, which does not help us much understanding what is going on. Let's see whether the container actually started. To see all running containers, type: 
-    ```bash
+    
+    ```sh
     docker container ls
     ```
     This returns all running containers with their name and a few more fields. In case you do not find your container in the list, something has gone wrong. To troubleshoot, you would... 
-    ```bash
+    
+    ```sh
     docker container ls --all
     ```
+
     ..., which lists all non-running containers as well, and then use...
-    ```bash
+
+    ```sh
     docker container logs <containername>
     ```
+
     ..., to find out what the container reported while starting (or trying to start). In our case, the container logs will show nothing yet.
 
 1. The container we just started already serves as a webserver, listening on port 80, but we cannot see its webpage yet. So far, the container is only attached to an internal virtual network called 'bridge', that can only be accessed from other containers on that network and our VM, which is hosting the network and the container. So, let's run another instance of nginx, but now we will map the containers port 80 to an externally visible port on the VM:
 
-    ```bash
+    ```sh
     docker container run --name mynginxwithport -d -p 80:80 nginx
     ```
+
     The `-p 80:80` flag tells docker to map the VM's port 80 to the containers port 80, so that the container now virtually listens on the VM's own port 80. If that port is already reserved by another process on the VM, our call would fail.
 
 1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address of your VM (the same you used to log on the machine in the beginnning) as `http://<machine address>`:
@@ -113,11 +122,13 @@ For a start, we will be running a very powerful and lightweight web server calle
 
 1. **Optional**: In case you want to get a glimpse of how the internal networking works, check the webserver from within the VM: You can find out the container's IP address by inspecting the default docker network 'bridge':
 
-    ```bash
+    ```sh
     docker network inspect bridge
     ```
+
     With that IP address, you can then curl the web servers start page like this:
-    ```bash
+
+    ```sh
     curl http://<container ip>
     ```
 
@@ -127,28 +138,31 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
 1. First we need to clean up, because we will want to reuse port 80, on which the container from the last exercise is still listening. (**CAUTION:** This will silently remove ALL running and non-running containers):
 
-    ```bash
+    ```sh
     docker container rm -f $(docker container ls -a -q)
     ```
+
     This command consists of two parts: `docker container ls` within the brackets lists all (`-a` flag) containers with only their IDs (`-q` flag). `docker container rm` then takes all these IDs and removes the containers, even if they are still running (`-f`).
 
 1. Now let's create our .NET Core Web App. That's easy:
 
-    ```bash
+    ```sh
     mkdir myapp
     cd myapp
     dotnet new mvc
     ```
+
     This creates a new directory, into which we navigate with `cd` and then use `dotnet new mvc` to initiate a web application with the same name as the directory (see [this article](https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app-xplat/start-mvc?view=aspnetcore-2.1) to learn more about this process).
 
     For a first test of the application, let's run it:
 
-    ```bash
+    ```sh
     dotnet run
     ```
+
     This will run the application in .NET Core's own web server (called Kestrel) and listen on port 5000 (Would like to let this run on port 80 as well to be able to navigate to it with a browser, but that currently would be more effort due to [this issue](https://github.com/aspnet/MetaPackages/issues/264)). If everything is ok, Kestrel will tell us that it is now listening at two development ports:
 
-    ```
+    ```txt
     Using launch settings from /home/...
     [...]
     Now listening on: https://localhost:5001
@@ -159,14 +173,15 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
 1. To actually put it in a container, we first need to 'publish' the application into a deployable package:
 
-    ```bash
+    ```sh
     dotnet publish -o package
     ```
+
     This compiles the application and puts it into the folder 'package'. 
 
 1. To put the packaged app into a container image, we now need to create a so called 'Dockerfile'. Type:
 
-    ```bash
+    ```sh
     nano Dockerfile
     ```
 
@@ -192,19 +207,21 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
 1. Build the Dockerfile with:
 
-    ```bash
+    ```sh
     docker image build --tag myappimage .
     ```
+
     The ``--tag`` flag defines the tag (effectively: the name) under which the image will be available to run containers with it. The `.` at the end of the command defines the build context, from which docker can copy files into the container (see the `COPY` statement in the Dockerfile). The `.` defines that we simply pass the local directory (recursively with all subdirectories) as the build context. Docker sends the build context to the docker engine as the first step of the build process.
 
 1. After the docker build finishes, the newly created image should be available in the list of images on this docker host. Use the following command to list these images:
-    ```bash
+
+    ```sh
     docker image ls
     ```
 
 1. Now we can finally run the image as a container:
 
-    ```bash
+    ```sh
     docker container run --name myapp -d -p 80:80 myappimage
     ```
 
@@ -229,9 +246,11 @@ To solve this problem, the building and packaging steps themselves should be run
    RUN dotnet publish --output /app --configuration Release
    WORKDIR /app
    ENTRYPOINT ["dotnet", "myapp.dll"]
-   ``` 
+   ```
+
 1. (Optional) Build and run the container image again with:
-    ```bash
+
+    ```sh
     docker image build --tag myappimage .
     docker container rm -f myapp
     docker container run --name myapp -d -p 80:80 myappimage 
@@ -241,7 +260,7 @@ To solve this problem, the building and packaging steps themselves should be run
 1. To solve the dilemma that we want to build within the image but we do not want the build tools in the image, we use a concept called Multi Stage Builds. This is achieved with the `AS` keyword that allows us to define a name for an image that can be directly used within the same Dockerfile. This image can then be used in additional images defined in the same Dockerfile to copy files out of it with the `--from` flag.
     
     Change your dockerfile to look like this:
-    ``` Dockerfile
+    ```Dockerfile
     # Stage 1
     FROM microsoft/dotnet:2.1-sdk AS  builder
     WORKDIR /source
@@ -255,7 +274,8 @@ To solve this problem, the building and packaging steps themselves should be run
     ```
     
 1. Build and run the container image again with:
-    ```bash
+
+    ```sh
     docker image build --tag myappimage .
     docker container rm -f myapp
     docker container run --name myapp -d -p 80:80 myappimage 
@@ -269,7 +289,7 @@ The second stage in the last Dockerfile produces our production image, which is 
 
 1. Create an ACR with Azure CLI:
 
-   ```bash
+   ```sh
    az acr create --name <registry name> --resource-group <resource group> --sku basic
    ```
 
@@ -279,37 +299,40 @@ The second stage in the last Dockerfile produces our production image, which is 
 
     Now we have our own private registry running in Azure available at `<registry name>.azurecr.io`. But we cannot yet access it from our machine. To enable this:
 
-   ```bash
+   ```sh
     az acr update --n <registry name> -g <resource group> --admin-enabled true
     az acr credential show -n <registry name> -g <resource group>
     ```
+
     Note the password and username.
 
 1. Log in to the Docker VM again with:
 
-    ```bash
+    ```sh
     ssh <user>@<machine adress> 
     ```
     For example:
-    ```bash
+
+    ```sh
     ssh Carsten@cadullcontlablin.westeurope.cloudapp.azure.com 
     ```
 
 1. Now we can log in with docker into our registry (replace `<registry name>` with your registry's name):
 
-    ```bash
+    ```sh
     docker login <registry name>.azurecr.io
     ```
     You will be prompted for username and password - enter the credentials noted in the previous step.
 
 1. If we are successfully logged in, we can now push our image 'myappimage' (from the previous exercise) to the registry. The registry an image is pulled from or pushed to is always encoded in its image tag. Thus, to push to our own registry, we first need to tag our image:
 
-    ```bash
+    ```sh
     docker image tag myappimage <registry name>.azurecr.io/myappimage:v1.0
     ```
+
 1. Now we can finally push:
 
-    ```bash
+    ```sh
     docker image push <registry name>.azurecr.io/myappimage:v1.0
     ```
 
@@ -326,13 +349,16 @@ The easiest way to deploy a container to a PaaS service in Azure is to use ACI, 
 1. Look up the credentials for your registry again.
 
 1. The actual deployment itself is done with a single command:
-    ```bash
+
+    ```sh
     az container create --resource-group <resource group> --name myapp --image <registry name>.azurecr.io/myappimage:v1.0 --cpu 1 --memory 1 --registry-login-server <registry name>.azurecr.io --registry-username <registry user> --registry-password <registry password> --dns-name-label <some unique name> --ports 80 
     ```
+
     Where `<some unique name>` is the prefix for the public DNS name under which your container will be available.
 
 1. Track the progress of your deployment with:
-    ```bash
+
+    ```sh
     az container show --resource-group <resource group> --name myapp --query instanceView.state
     ```
 1. Once the state is 'Running', you can look up the full address of your container by running `az container show` again but without the `--query` flag. Look up the `fqdn` field in the output of the command and copy its value. 
@@ -340,7 +366,8 @@ The easiest way to deploy a container to a PaaS service in Azure is to use ACI, 
 1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address you just copied: `http://<fqdn>`. This should show you the same view of our app as in the previous exercise.
 
 1. To troubleshoot, you can use:
-    ```bash
+
+    ```sh
     az container logs --resource-group <resource group> --name myapp
     ```
     This will give you the same type of logs as in the previous exercises, when we called `docker logs`, only that this time the container is running in the cloud.
@@ -355,15 +382,18 @@ Azure App Service is specifically designed for web apps and thus adds many featu
 
 1. First we need to create an App Service Plan (for more info see the [Azure documentation](https://docs.microsoft.com/en-us/azure/app-service/azure-web-sites-web-hosting-plans-in-depth-overview)). An App Service Plan defines the size (and price), available features and more settings for our Web App. In your Cloud shell, execute this command:
 
-    ```bash
+    ```sh
     az appservice plan create --name myappserviceplan --resource-group <resource group> --sku B1 --is-linux
     ```
+
     This creates an app service plan in the B1 size category with support for Linux containers.
 
 1. The actual thing that is running a website in Azure App Service is the (aptly named) Web App. We create one with this command:
-    ```bash
+
+    ```sh
     az webapp create --resource-group <resource group> --plan myappserviceplan --name <app name> --deployment-container-image-name <registry name>.azurecr.io/myappimage:v1.0
     ```
+
     Where `<app name>` is a name that must be still available as the FQDN `<app name>.azurewebsites.net`. This creates a web app and alreay tells it where it can pull the container image to run as a container in this web app.
 
 1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to: `http://<app name>.azurewebsites.net`. This will not work yet:
@@ -376,26 +406,28 @@ Azure App Service is specifically designed for web apps and thus adds many featu
 
 1. The pulling of the image does not work, because by default it is  trying to pull from Docker hub, where our image cannot be found. We need to tell the web app to pull from our registry:
 
-    ```bash
+    ```sh
     az webapp config container set --name <app name> --resource-group <resource group> --docker-custom-image-name <registry name>.azurecr.io/myappimage:v1.0 --docker-registry-server-url https://<registry name>.azurecr.io
     ```
     You might need to restart the web app a few times before it starts working:
-    ```bash
+    ```sh
     az webapp restart --name <app name> --resource-group <resource group>
     ```
     Only in case your ACR is in a different resource group or subscription than the web app, you might see an error like "Authentication failed" in the logs in the **Container settings** in the portal. This is because the app is not by default authenticated for any ACR. The easiest way to fix this would then be adding the credentials for the registry that we noted in the previous exercise. To do so, use this command:
 
-    ```bash
+    ```sh
     az webapp config container set --name <app name> --resource-group <resource group> --docker-registry-server-user <registry user> --docker-registry-server-password <registry password>
     ```
 
 1. One of the features of Web Apps that can make life easier for us is that it automatically adds https (SSL) support, without us needing to install and configure certificates. Now to enforce SSL for our app, we do:
 
-    ```bash
+    ```sh
     az webapp update -g <resource group> -n <app name> --https-only true
     ```
 
     Now, when we browse to our web app again with `http://<app name>.azurewebsites.net`, whe should automatically be redirected to `https://<app name>.azurewebsites.net`.
+
+---
 
 ## Summary
 
