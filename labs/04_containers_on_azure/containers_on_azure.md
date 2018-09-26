@@ -318,27 +318,70 @@ The easiest way to deploy a container to a PaaS service in Azure is to use ACI, 
     ```bash
     az container show --resource-group <resource group> --name myapp --query instanceView.state
     ```
-1. Once the state is 'Running', you can look up the full DNS by running `az container show` again but without the `--query` flag. With that DNS address, you should be able to see the application in the browser of your choice.
+1. Once the state is 'Running', you can look up the full address of your container by running `az container show` again but without the `--query` flag. Look up the `fqdn` field in the output of the command and copy its value. 
+
+1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address you just copied: `http://<fqdn>`. This should show you the same view of our app as in the previous exercise.
 
 1. To troubleshoot, you can use:
     ```bash
     az container logs --resource-group <resource group> --name myapp
     ```
+    This will give you the same type of logs as in the previous exercises, when we called `docker logs`, only that this time the container is running in the cloud.
+
+ACI (specifically with the `az container` commands) can be treated as your giant Docker engine in the cloud that is just there, no setup required. This enables great use cases, a few of which are described in the [Azure documentation](https://azure.microsoft.com/en-us/services/container-instances/). For example, any batch process that simply runs in the background (some data but not serving any traffic interactively), would be a perfect fit for ACI. Our sample app though is just a simple web app - and for such single-container web apps there is an even better fit available for running in the cloud: Azure App Service. Which is the topic of the next exercise. 
 
 ## Exercise 6: Deploy to Azure App Service
 
-1. Try it:
+So far in this lab, we looked at our containers in a generic way: Some process needs to run and optionally listen on a specific network port. Yet this might be anything, web, mail, a database engine - on this generic level, any added service (like adding authentication) needs to be connected to our application manually.
+
+Azure App Service is specifically designed for web apps and thus adds many features like simple SSL setup or simple Azure Active Directory integration for authentication that can be turned on by setting simple switches. Azure App Service Web Apps support containers (Linux and Windows) as a deployment vehicle, thus for our simple web app, this is the best fit for letting it run as a PaaS in the cloud.
+
+1. First we need to create an App Service Plan (for more info see the [Azure documentation](https://docs.microsoft.com/en-us/azure/app-service/azure-web-sites-web-hosting-plans-in-depth-overview)). An App Service Plan defines the size (and price), available features and more settings for our Web App. In your Cloud shell, execute this command:
 
     ```bash
     az appservice plan create --name myappserviceplan --resource-group <resource group> --sku B1 --is-linux
-    az webapp create --resource-group <resource group> --plan myaappserviceplan --name myappserviceapp --deployment-container-image-name <registry name>.azurecr.io/myappimage:v1.0
-    az webapp config appsettings set --resource-group <resource group> --name myappserviceapp --settings WEBSITES_PORT=80
-    az webapp config container set --name myappserviceapp --resource-group <resource group> --docker-custom-image-name <registry name>.azurecr.io/myappimage:v1.0 --docker-registry-server-url https://<registry name>.azurecr.io --docker-registry-server-user <registry user> --docker-registry-server-password <registry password>
-    az webapp update -g <resource group> -n myappserviceapp --https-only true
     ```
+    This creates an app service plan in the B1 size category with support for Linux containers.
+
+1. The actual thing that is running a website in Azure App Service is the (aptly named) Web App. We create one with this command:
+    ```bash
+    az webapp create --resource-group <resource group> --plan myappserviceplan --name <app name> --deployment-container-image-name <registry name>.azurecr.io/myappimage:v1.0
+    ```
+    Where `<app name>` is a name that must be still available as the FQDN `<app name>.azurewebsites.net`. This creates a web app and alreay tells it where it can pull the container image to run as a container in this web app.
+
+1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to: `http://<app name>.azurewebsites.net`. This will not work yet:
+
+    ![App Service Unavailable](./media/apperviceunavailable.png)
+
+1. In the Azure portal, navigate to your web app by entering "<app name>" in the search bar at the top and selecting **Container settings** on the left. It should be showing a problem with the container image:
+
+    ![Web App Failing To Pull](./media/webappfailingtopull.png)
+
+1. The pulling of the image does not work, because by default it is  trying to pull from Docker hub, where our image cannot be found. We need to tell the web app to pull from our registry:
+
+    ```bash
+    az webapp config container set --name <app name> --resource-group <resource group> --docker-custom-image-name <registry name>.azurecr.io/myappimage:v1.0 --docker-registry-server-url https://<registry name>.azurecr.io
+    ```
+    You might need to restart the web app a few times before it starts working:
+    ```bash
+    az webapp restart --name <app name> --resource-group <resource group>
+    ```
+    Only in case your ACR is in a different resource group or subscription than the web app, you might see an error like "Authentication failed" in the logs in the **Container settings** in the portal. This is because the app is not by default authenticated for any ACR. The easiest way to fix this would then be adding the credentials for the registry that we noted in the previous exercise. To do so, use this command:
+
+    ```bash
+    az webapp config container set --name <app name> --resource-group <resource group> --docker-registry-server-user <registry user> --docker-registry-server-password <registry password>
+    ```
+
+1. One of the features of Web Apps that can make life easier for us is that it automatically adds https (SSL) support, without us needing to install and configure certificates. Now to enforce SSL for our app, we do:
+
+    ```bash
+    az webapp update -g <resource group> -n <app name> --https-only true
+    ```
+
+    Now, when we browse to our web app again with `http://<app name>.azurewebsites.net`, whe should automatically be redirected to `https://<app name>.azurewebsites.net`.
 
 ## Summary
 
-We now have everything in place to containerize and deploy applications to Azure. The start of everything is the Dockerfile, representing the gateway from out there in the wild into the new world of containers, where our app will always run in its own beatiful isolated space. The foundation for any deployment of containers to a production platform is having a container registry, like the ACR we created.
+We now have everything in place to containerize and deploy applications to Azure. The start of everything is the Dockerfile we created, representing the gateway from "out there in the wild" into the new world of containers, where our app will always run in its own beautiful isolated space. We as well created a container registry, which is the foundation for any deployment of containers to a production platform.
 
-Finally, the deployment methods to App Service (for web apps, utilizing the battle tested features of App Service like integrated Authentication or SSL support) or Azure Container Instances (more lightweigt and flexible) represent production ready runtime options for **single**-container applications. **Multi**-container applications (e.g. any microservice application) require more, they need *orchestration*, a concept that nowadays we typically address by using an orchestration service like Kubernetes. This will be the topic of our next lab!
+Finally, the deployment methods to App Service (for web apps, utilizing the battle tested features of App Service like integrated Authentication or SSL support) or Azure Container Instances (more lightweigt and generic) represent production ready runtime options for **single**-container applications. **Multi**-container applications (e.g. any microservice application) require more, they need *orchestration*, a concept that nowadays we typically address by using an orchestration service like Kubernetes. This will be the topic of our next lab!
