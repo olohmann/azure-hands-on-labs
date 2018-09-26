@@ -195,30 +195,56 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
    ![The web app served from our container](./media/dotnetcoreapp.png)
 
-##  Exercise 3.a: **Optional**: Upgrade Dockerfile to use multi stage build
+Our application is now running in a container and we can access it publically. But it is running on a single VM, which means our application will fail if this single VM fails. Maybe even more important: We would need to secure and manage the VM on our own. In summary: We are still on the level of IaaS (Infrastructure as a Service). With the next level - PaaS (Platform as a Service) - we will get rid of the responsibility for infrastructure and automatically get a much better reliability. That will be the topic for exercises 4 and 5. 
 
-[Skip for now]
+##  Exercise 3.a: **Optional**: Upgrade Dockerfile to use multi-stage build
 
-1. Dockerfile:
-```Dockerfile
-   # Stage 1
-   FROM microsoft/dotnet:2.1-sdk AS builder
+In the preceding exercise we created our app container by first building and packaging the application outside of the container world by issuing the `dotnet publish -o package` command directly on the VM that currently is our 'development machine'. The resulting package then was copied into our container with the `COPY` command. This works, but to some extent it defeats our original purpose to make sure that the outside world always looks the same to our beloved app. For example, the version of the .NET Core CLI on our dev machine might be another one as the one in the base image `microsoft/dotnet:2.1-aspnetcore-runtime`. Or some system library we rely on behaves slightly differently because some configuration item has been set to another value somewhere in the file system.
+
+To solve this problem, the building and packaging steps themselves should be running in a container as well.
+
+1. For building and packaging a .NET Core app, we need the .NET SDK installed. The base image we used in the preceding exercise only has the runtime, not the SDK, thus we need another base image. Additionally, we need to execute the publish command right within the container, which we can achieve using the `RUN` command. Change your Dockerfile to look like this:
+
+   ```Dockerfile
+   FROM microsoft/dotnet:2.1-sdk
    WORKDIR /source
-
-   # caches restore result by copying csproj file separately
-   COPY *.csproj .
-   RUN dotnet restore
-
-   # copies the rest of the code
    COPY . .
-   RUN dotnet publish --output package --configuration Release
-
-   # Stage 2
-   FROM microsoft/dotnet:2.1-aspnetcore-runtime
+   RUN dotnet publish --output /app --configuration Release
    WORKDIR /app
-   COPY --from=builder /source/package .
    ENTRYPOINT ["dotnet", "myapp.dll"]
-``` 
+   ``` 
+1. (Optional) Build and run the container image again with:
+    ```bash
+    docker image build --tag myappimage .
+    docker container rm -f myapp
+    docker container run --name myapp -d -p 80:80 myappimage 
+    ```
+    It should just work as it did before. The only real difference is that we built the whole thing right within our container image and we changed the `WORKDIR` in between. Yet the resulting image is not what we would like to run in production. It contains not only the runtime and our app, it carries the SDK as well. Running this image in production would be like shipping the factory along with the car. The additional files and packages in the image not only make it larger and thus less quick to deploy and start, they only make the image less secure by providing additional attack surface, an attacker might exploit to get access to our application. This needs to be changed.
+
+1. To solve the dilemma that we want to build within the image but we do not want the build tools in the image, we use a concept called Multi Stage Builds. This is achieved with the `AS` keyword that allows us to define a name for an image that can be directly used within the same Dockerfile. This image can then be used in additional images defined in the same Dockerfile to copy files out of it with the `--from` flag.
+    
+    Change your dockerfile to look like this:
+    ``` Dockerfile
+    # Stage 1
+    FROM microsoft/dotnet:2.1-sdk AS  builder
+    WORKDIR /source
+    COPY . .
+    RUN dotnet publish --output package  --configuration Release
+    # Stage 2
+    FROM  microsoft/dotnet:2.1-aspnetcore-runtime
+    WORKDIR /app
+    COPY --from=builder /source/package .
+    ENTRYPOINT ["dotnet", "myapp.dll"]
+    ```
+    
+1. Build and run the container image again with:
+    ```bash
+    docker image build --tag myappimage .
+    docker container rm -f myapp
+    docker container run --name myapp -d -p 80:80 myappimage 
+    ```
+
+The second stage in the last Dockerfile produces our production image, which is based on `microsoft/dotnet:2.1-aspnetcore-runtime` again, so that we have a tiny and more secure resulting containerized application again, but still running the build in a container as well.
 
 ## Exercise 4: Create Azure Container Registry (ACR) and push image
 
@@ -276,8 +302,28 @@ Now we are ready to deploy to any Azure service from our registry.
 
 ## Exercise 5: Deploy to Azure Container Instances (ACI)
 
-1. [Coming soon]
+The easiest way to deploy a container to a PaaS service in Azure is to use ACI, which can be seen as "serverless" containers. The Azure platform takes care of everything that needs to be in place in the background, like the container host on which the container will run. We will never need to care about patching or securing the infrastructure and can focus on developing and securing our application itself.
 
+1. Open the Cloud Shell (in case you are stilled logged into the VM, just type `exit` and you should be back).
+
+1. Look up the credentials for your registry again.
+
+1. The actual deployment itself is done with a single command:
+    ```bash
+    az container create --resource-group <resource group> --name myapp --image <registry name>.azurecr.io/myappimage:v1.0 --cpu 1 --memory 1 --registry-login-server <registry name>.azurecr.io --registry-username <registry user> --registry-password <registry password> --dns-name-label <some unique name> --ports 80 
+    ```
+    Where `<some unique name>` is the prefix for the public DNS name under which your container will be available.
+
+1. Track the progress of your deployment with:
+    ```bash
+    az container show --resource-group <resource group> --name myapp --query instanceView.state
+    ```
+1. Once the state is 'Running', you can look up the full DNS by running `az container show` again but without the `--query` flag. With that DNS address, you should be able to see the application in the browser of your choice.
+
+1. To troubleshoot, you can use:
+    ```bash
+    az container logs --resource-group <resource group> --name myapp
+    ```
 
 ## Exercise 6: Deploy to Azure App Service
 
