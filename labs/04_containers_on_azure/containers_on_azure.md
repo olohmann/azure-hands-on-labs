@@ -62,6 +62,8 @@ Estimated time to complete this lab: **90-120** minutes.
     ```bash
     ssh Carsten@cadullcontlablin.westeurope.cloudapp.azure.com 
     ```
+    (Pasting into the cloud shell will likely require using the browser's context menu. Thus, if it does not work, try a right click into the console with your mouse)
+
     You will be asked whether to accept this new host (enter **yes**) and for the password (enter the password provided by your instructor).
 
     After this login succeeds, we have a bash shell running right in the Linux VM, in which we will work with Docker.
@@ -176,16 +178,31 @@ Now that we know how to run a pre-packaged app from a public container registry 
     COPY package .
     ENTRYPOINT ["dotnet", "myapp.dll"]
     ```
+    This Dockerfile tells docker how to put our app into a container image. In the first line it defines the base image to be used with the `FROM` keyword. Our image will just be a thin additional layer on top of that base image, thus this base image needs to contain everything we need to run our app, in this case that is the ASP.NET Core runtime.
 
-    Save the text with `Ctrl+O` and exit nano with `Ctrl+X`.
+    The `WORKDIR` instruction in the second line defines the working directory for subsequent instructions and - if this is the last `WORKDIR` in the Dockerfile - for the running container. In case the given directory does not yet exist in the file system of the base image, the directory is created by docker.
+
+    The `COPY` instruction then copies our application package from the so called build context (more on the build context in the next steps) into the container - in this case - using "`.`" - we want to have everything in the *package* folder be copied right into our working directory.
+
+    The `ENTRYPOINT` finally defines what will happen at start time of the container. In this case, we want to start the `dotnet` executable with the app's code in "`myapp.dll`" as an argument. The entrypoint can be any executable with any arguments. The process that is started through the entrypoint defines the lifecycle of the container - the container will stay alive as long as this entry process is alive.
+
+    The [Docker documentation](https://docs.docker.com/) has more information on [Dockerfile instructions](https://docs.docker.com/engine/reference/builder/) and [best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/).
+
+1. In the nano editor, save the text with `Ctrl+O` and exit nano with `Ctrl+X`.
 
 1. Build the Dockerfile with:
 
     ```bash
     docker image build --tag myappimage .
     ```
+    The ``--tag`` flag defines the tag (effectively: the name) under which the image will be available to run containers with it. The `.` at the end of the command defines the build context, from which docker can copy files into the container (see the `COPY` statement in the Dockerfile). The `.` defines that we simply pass the local directory (recursively with all subdirectories) as the build context. Docker sends the build context to the docker engine as the first step of the build process.
 
-1. Run the image as a container:
+1. After the docker build finishes, the newly created image should be available in the list of images on this docker host. Use the following command to list these images:
+    ```bash
+    docker image ls
+    ```
+
+1. Now we can finally run the image as a container:
 
     ```bash
     docker container run --name myapp -d -p 80:80 myappimage
@@ -203,7 +220,7 @@ In the preceding exercise we created our app container by first building and pac
 
 To solve this problem, the building and packaging steps themselves should be running in a container as well.
 
-1. For building and packaging a .NET Core app, we need the .NET SDK installed. The base image we used in the preceding exercise only has the runtime, not the SDK, thus we need another base image. Additionally, we need to execute the publish command right within the container, which we can achieve using the `RUN` command. Change your Dockerfile to look like this:
+1. For building and packaging a .NET Core app, we need the .NET SDK installed. The base image we used in the preceding exercise only has the runtime, not the SDK, thus we need another base image. Additionally, we need to execute the publish command right within the container, which we can achieve using the `RUN` instruction. Change your Dockerfile to look like this:
 
    ```Dockerfile
    FROM microsoft/dotnet:2.1-sdk
