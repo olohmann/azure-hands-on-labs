@@ -162,7 +162,7 @@ Now that we know how to run a pre-packaged app from a public container registry 
     dotnet run
     ```
 
-    This will run the application in .NET Core's own web server (called Kestrel) and listen on port 5000 (Would like to let this run on port 80 as well to be able to navigate to it with a browser, but that currently would be more effort due to [this issue](https://github.com/aspnet/MetaPackages/issues/264)). If everything is ok, Kestrel will tell us that it is now listening at two development ports:
+    This will run the application in .NET Core's own web server (called Kestrel) and listen on port 5000. If everything is ok, Kestrel will tell us that it is now listening at two development ports:
 
     ```txt
     Using launch settings from /home/...
