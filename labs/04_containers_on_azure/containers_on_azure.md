@@ -43,7 +43,9 @@ Estimated time to complete this lab: **90-120** minutes.
 
 1. Open the [Azure Portal](https://portal.azure.com), log on with your lab account, if necessary. You can see the currently logged on account in the top right of the portal:
 
-   ![Loggend on account in Azure portal](./media/portalloggedonuser.png)
+    ![Loggend on account in Azure portal](./media/portalloggedonuser.png)
+
+    If this is not the lab user that was provided to you, please start a new "In Private" or "Incognito" window and start the Azure portal again.
 
 1. Start the Azure Cloud Shell (Bash) by clicking the console icon in the top bar of the portal:
 
