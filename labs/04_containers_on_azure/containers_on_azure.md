@@ -66,6 +66,7 @@ Estimated time to complete this lab: **90-120** minutes.
     ```sh
     ssh labuser29@labuser29-xxxx.westeurope.cloudapp.azure.com
     ```
+
     (Pasting into the cloud shell will likely require using the browser's context menu. Thus, if it does not work, try a right click into the console with your mouse)
 
     You will be asked whether to accept this new host (enter **yes**) and for the password (enter the password provided by your instructor).
@@ -316,7 +317,7 @@ The second stage in the last Dockerfile produces our production image, which is 
     For example:
 
     ```sh
-    ssh Carsten@cadullcontlablin.westeurope.cloudapp.azure.com 
+    ssh labuser29@labuser29-xxxx.westeurope.cloudapp.azure.com
     ```
 
 1. Now we can log in with docker into our registry (replace `<registry name>` with your registry's name):
@@ -324,13 +325,22 @@ The second stage in the last Dockerfile produces our production image, which is 
     ```sh
     docker login <registry name>.azurecr.io
     ```
+
     You will be prompted for username and password - enter the credentials noted in the previous step.
 
-1. If we are successfully logged in, we can now push our image 'myappimage' (from the previous exercise) to the registry. The registry an image is pulled from or pushed to is always encoded in its image tag. Thus, to push to our own registry, we first need to tag our image:
+1. If we are successfully logged in, we can now push our image 'myappimage' (from the previous exercise) to the registry. The registry an image is pushed to is always encoded in its image tag. Thus, to push to our own registry, we first need to tag our image:
 
     ```sh
     docker image tag myappimage <registry name>.azurecr.io/myappimage:v1.0
     ```
+
+    This command is tagging the image that currently has the name *myappimage* with a new tag containing the registry name. All image names are following this pattern:
+
+    ```txt
+    <registry>/<repository>:<tag>
+    ```
+
+    Thus, *myappimage* is actually the name of a repository of images, distinguished from each other by tags. In this case the tag is marking the version of our app, so that we can exactly define which version to pull and run. You will recognize the hierarchy of registry/repository/tag in one of the next steps, after we pushed to the registry.
 
 1. Now we can finally push:
 
