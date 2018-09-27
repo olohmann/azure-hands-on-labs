@@ -37,7 +37,7 @@ Typically these should be preconfigured for your (if in doubt, ask your instruct
 
 ---
 
-Estimated time to complete this lab: **90-180** minutes.
+Estimated time to complete this lab: **120-180** minutes.
 
 ## Exercise 1: Log on to your VM
 
