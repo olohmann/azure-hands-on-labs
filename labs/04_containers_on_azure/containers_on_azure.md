@@ -41,6 +41,8 @@ Estimated time to complete this lab: **120-180** minutes.
 
 ## Exercise 1: Log on to your VM
 
+ ![Exercise 1 Goal](./media/exercise1.png)
+
 1. Open the [Azure Portal](https://portal.azure.com), log on with your lab account, if necessary. You can see the currently logged on account in the top right of the portal:
 
     ![Loggend on account in Azure portal](./media/portalloggedonuser.png)
@@ -83,6 +85,8 @@ Estimated time to complete this lab: **120-180** minutes.
 ## Exercise 2: Run a web server in a container
 
 For a start, we will be running a very powerful and lightweight web server called [nginx](https://www.nginx.com/). This web server is available as a pre-packaged container image at [Docker Hub](https://hub.docker.com/_/nginx/).
+
+ ![Exercise 2 Goal](./media/exercise2.png)
 
 1. We will tell docker to pull the nginx image from Docker Hub and let it run in our docker engine with a single command. Type:
 
@@ -138,6 +142,8 @@ For a start, we will be running a very powerful and lightweight web server calle
 ## Exercise 3: Create and containerize a .NET Core Web App
 
 Now that we know how to run a pre-packaged app from a public container registry like Docker Hub, we would like to see the same for our own applications. We will create a new .NET Core app (no coding required) and put that into a container image like the nginx image we used in the preceding exercise.
+
+ ![Exercise 3 Goal](./media/exercise3.png)
 
 1. First we need to clean up, because we will want to reuse port 80, on which the container from the last exercise is still listening. (**CAUTION:** This will silently remove ALL running and non-running containers):
 
@@ -290,6 +296,8 @@ The second stage in the last Dockerfile produces our production image, which is 
 
 So far we only ran the container on our own docker host (our Linux VM). To be able to deploy to other container environments, we need a [registry](https://docs.docker.com/registry/). We will push our image to the registry, so that others can pull it from there. Azure offers a managed service for this, called Azure Container Registry (ACR), which we will use in this lab.
 
+ ![Exercise 4 Goal](./media/exercise4.png)
+
 1. Open the Cloud Shell (in case you are stilled logged into the VM, just type `exit` and you should be back).
 
 1. Create an ACR with Azure CLI:
@@ -358,6 +366,8 @@ Now we are ready to deploy to any Azure service from our registry.
 
 The easiest way to deploy a container to a PaaS service in Azure is to use ACI, which can be seen as "serverless" containers. The Azure platform takes care of everything that needs to be in place in the background, like the container host on which the container will run. We will never need to care about patching or securing the infrastructure and can focus on developing and securing our application itself.
 
+ ![Exercise 5 Goal](./media/exercise5.png)
+
 1. Open the Cloud Shell (in case you are stilled logged into the VM, just type `exit` and you should be back).
 
 1. Look up the credentials for your registry again.
@@ -393,6 +403,8 @@ ACI (specifically with the `az container` commands) can be treated as your giant
 So far in this lab, we looked at our containers in a generic way: Some process needs to run and optionally listen on a specific network port. Yet this might be anything, web, mail, a database engine - on this generic level, any added service (like adding authentication) needs to be connected to our application manually.
 
 Azure App Service is specifically designed for web apps and thus adds many features like simple SSL setup or simple Azure Active Directory integration for authentication that can be turned on by setting simple switches. Azure App Service Web Apps support containers (Linux and Windows) as a deployment vehicle, thus for our simple web app, this is the best fit for letting it run as a PaaS in the cloud.
+
+![Exercise 6 Goal](./media/exercise6.png)
 
 1. First we need to create an App Service Plan (for more info see the [Azure documentation](https://docs.microsoft.com/en-us/azure/app-service/azure-web-sites-web-hosting-plans-in-depth-overview)). An App Service Plan defines the size (and price), available features and more settings for our Web App. In your Cloud shell, execute this command:
 
