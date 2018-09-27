@@ -340,7 +340,7 @@ The second stage in the last Dockerfile produces our production image, which is 
     <registry>/<repository>:<tag>
     ```
 
-    Thus, *myappimage* is actually the name of a repository of images, distinguished from each other by tags. In this case the tag is marking the version of our app, so that we can exactly define which version to pull and run. You will recognize the hierarchy of registry/repository/tag in one of the next steps, after we pushed to the registry.
+    Thus, *myappimage* is actually the name of a repository of images, distinguished from each other by tags. In this case, the tag is marking the version of our app, so that we can exactly define which version to pull and run. You will recognize the hierarchy of registry/repository/tag in one of the next steps, after we pushed to the registry.
 
 1. Now we can finally push:
 
