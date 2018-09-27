@@ -37,7 +37,7 @@ Typically these should be preconfigured for your (if in doubt, ask your instruct
 
 ---
 
-Estimated time to complete this lab: **90-120** minutes.
+Estimated time to complete this lab: **90-180** minutes.
 
 ## Exercise 1: Log on to your VM
 
@@ -288,19 +288,21 @@ The second stage in the last Dockerfile produces our production image, which is 
 
 ## Exercise 4: Create Azure Container Registry (ACR) and push image
 
+So far we only ran the container on our own docker host (our Linux VM). To be able to deploy to other container environments, we need a [registry](https://docs.docker.com/registry/). We will push our image to the registry, so that others can pull it from there. Azure offers a managed service for this, called Azure Container Registry (ACR), which we will use in this lab.
+
 1. Open the Cloud Shell (in case you are stilled logged into the VM, just type `exit` and you should be back).
 
 1. Create an ACR with Azure CLI:
 
-   ```sh
-   az acr create --name <registry name> --resource-group <resource group> --sku basic
-   ```
+    ```sh
+    az acr create --name <registry name> --resource-group <resource group> --sku basic
+    ```
 
     Where...
     *  `<registry name>` is a name that you can freely choose, but that must still be available as `<registry name>.azurecr.io`.
     *  `<resorce group>` is the name of the rexource group that you have contributor permissions to (when in doubt, ask your instructor).
 
-    Now we have our own private registry running in Azure available at `<registry name>.azurecr.io`. But we cannot yet access it from our machine. To enable this:
+    Now we have our own private registry running in Azure available at `<registry name>.azurecr.io`. We say that it is a **private** registry (although it is running in the public cloud), because it is protected by authentication. By default, access to the registry is restricted to identities that were granted permissions through Azure Active Directory (AAD) and Role Based Access Control (RBAC). Yet for the purpose of this lab, we will use an easier option: A credentials based authentication mechanism called the [Admin account](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account). To enable it and get the credentials, use these commands:
 
    ```sh
     az acr update --n <registry name> -g <resource group> --admin-enabled true
@@ -328,7 +330,7 @@ The second stage in the last Dockerfile produces our production image, which is 
 
     You will be prompted for username and password - enter the credentials noted in the previous step.
 
-1. If we are successfully logged in, we can now push our image 'myappimage' (from the previous exercise) to the registry. The registry an image is pushed to is always encoded in its image tag. Thus, to push to our own registry, we first need to tag our image:
+1. If we are successfully logged in, we can now push our image 'myappimage' (from the previous exercise) to the registry. The registry an image is pushed to, is always encoded in its image tag. Thus, to push to our own registry, we first need to re-tag our image:
 
     ```sh
     docker image tag myappimage <registry name>.azurecr.io/myappimage:v1.0
