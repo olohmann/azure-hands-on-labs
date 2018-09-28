@@ -469,9 +469,15 @@ In this challenge, the idea is to be able to use the same container image of our
 
     And then use that label in the About-String that this controller returns.
 
-2. Rebuild the image, give it a new tag and push it to the registry.
+1. Rebuild the image, give it a new tag and push it to the registry.
 
-3. Set the new image name and tag and the environment variables in ACI and App Service.
+1. Try to run the image on the Docker host with:
+
+    ```sh
+    docker container run -e ENVIRONMENT_LABEL=LinuxVM -d -p 80:80 myappimage
+    ```
+
+1. Set the new image name and tag and the environment variables in ACI and App Service.
 
 ---
 
