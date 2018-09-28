@@ -455,6 +455,26 @@ Azure App Service is specifically designed for web apps and thus adds many featu
 
 ---
 
+## Extra Challenge: Use Environment Variables
+
+So, Container should be able to run everywhere and everything looks the same all the time? Unfortunately, that is not entirely correct. Typically, there **are** differences between environments, like connection strings or such. In a container world though, we always try to keep these differences down to a level that simple key-value-pairs are enough to configure these settings. The most universal method to pass key-value-pairs to a process is to use environment variables, which is why environment variables are key to this problem in the container world.
+
+In this challenge, the idea is to be able to use the same container image of our app, but let it display info about the environment it is running in in its "About" page.
+
+1. Change the code in `HomeController.cs` to display the label. You will use code similar to this: 
+
+    ```cs
+    var label = Environment.GetEnvironmentVariable("ENVIRONMENT_LABEL");
+    ```
+
+    And then use that label in the About-String that this controller returns.
+
+2. Rebuild the image, give it a new tag and push it to the registry.
+
+3. Set the new image name and tag and the environment variables in ACI and App Service.
+
+---
+
 ## Summary
 
 We now have everything in place to containerize and deploy applications to Azure. The start of everything is the Dockerfile we created, representing the gateway from "out there in the wild" into the new world of containers, where our app will always run in its own beautiful isolated space. We as well created a container registry, which is the foundation for any deployment of containers to a production platform.
