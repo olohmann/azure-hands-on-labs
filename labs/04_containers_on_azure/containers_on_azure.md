@@ -31,9 +31,7 @@ In this hands-on lab, you will learn how to:
 
 Typically these should be preconfigured for your (if in doubt, ask your instructor):
 - An active Azure subscription or resource group to which you have contributor permissions.
-- A Linux machine running in Azure with access to the cloud and the following components installed:
-   - Docker ([installation instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/))
-   - .NET Core SDK ([installation instructions](https://www.microsoft.com/net/download/linux-package-manager/ubuntu16-04/sdk-current))
+- An Ubuntu Linux machine running in Azure with access to the cloud and Docker installed ([installation instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/)).
 
 ---
 
@@ -139,9 +137,9 @@ For a start, we will be running a very powerful and lightweight web server calle
     curl http://<container ip>
     ```
 
-## Exercise 3: Create and containerize a .NET Core Web App
+## Exercise 3: Create and containerize a Web App
 
-Now that we know how to run a pre-packaged app from a public container registry like Docker Hub, we would like to see the same for our own applications. We will create a new .NET Core app (no coding required) and put that into a container image like the nginx image we used in the preceding exercise.
+Now that we know how to run a pre-packaged app from a public container registry like Docker Hub, we would like to see the same for our own applications. We will create a new app from scratch (no coding required) and put that into a container image like the nginx image we used in the preceding exercise.
 
  ![Exercise 3 Goal](./media/exercise3.png)
 
@@ -153,144 +151,27 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
     This command consists of two parts: `docker container ls` within the brackets lists all (`-a` flag) containers with only their IDs (`-q` flag). `docker container rm` then takes all these IDs and removes the containers, even if they are still running (`-f`).
 
-1. Now let's create our .NET Core Web App. That's easy:
-
-    ```sh
-    mkdir myapp
-    cd myapp
-    dotnet new mvc
-    ```
-
-    This creates a new directory, into which we navigate with `cd` and then use `dotnet new mvc` to initiate a web application with the same name as the directory (see [this article](https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app-xplat/start-mvc?view=aspnetcore-2.1) to learn more about this process).
-
-    For a first test of the application, let's run it:
-
-    ```sh
-    dotnet run
-    ```
-
-    This will run the application in .NET Core's own web server (called Kestrel) and listen on port 5000. If everything is ok, Kestrel will tell us that it is now listening at two development ports:
-
-    ```txt
-    Using launch settings from /home/...
-    [...]
-    Now listening on: https://localhost:5001
-    Now listening on: http://localhost:5000
-    Application started. Press Ctrl+C to shut down.
-    ```
-    Press `Ctrl+C` to stop the application.
-
-1. To actually put it in a container, we first need to 'publish' the application into a deployable package:
-
-    ```sh
-    dotnet publish -o package
-    ```
-
-    This compiles the application and puts it into the folder 'package'. 
-
-1. To put the packaged app into a container image, we now need to create a so called 'Dockerfile'. Type:
-
-    ```sh
-    nano Dockerfile
-    ```
-
-    This creates an empty file with the name 'Dockerfile' and opens the nano text editor to edit the file. Copy and paste the following text into the text editor:
-
-    ```Dockerfile
-    FROM microsoft/dotnet:2.1-aspnetcore-runtime
-    WORKDIR /app
-    COPY package .
-    ENTRYPOINT ["dotnet", "myapp.dll"]
-    ```
-    This Dockerfile tells docker how to put our app into a container image. In the first line it defines the base image to be used with the `FROM` keyword. Our image will just be a thin additional layer on top of that base image, thus this base image needs to contain everything we need to run our app, in this case that is the ASP.NET Core runtime.
-
-    The `WORKDIR` instruction in the second line defines the working directory for subsequent instructions and - if this is the last `WORKDIR` in the Dockerfile - for the running container. In case the given directory does not yet exist in the file system of the base image, the directory is created by docker.
-
-    The `COPY` instruction then copies our application package from the so called build context (more on this in the next steps) into the container image. In this case we use `package` (a path in the build context) on the left side as source and . (a path within the container image starting at the working directory) on the right side as target, which means that we want to copy everything in the *package* folder right into our working directory.
-
-    The `ENTRYPOINT` finally defines what will happen at start time of the container. In this case, we want to start the `dotnet` executable with the app's code in "`myapp.dll`" as an argument. The entrypoint can be any executable with any arguments. The process that is started through the entrypoint defines the lifecycle of the container - the container will stay alive as long as this entry process is alive.
-
-    The [Docker documentation](https://docs.docker.com/) has more information on [Dockerfile instructions](https://docs.docker.com/engine/reference/builder/) and [best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/).
-
-1. In the nano editor, save the text with `Ctrl+O` and exit nano with `Ctrl+X`.
-
-1. Build the Dockerfile with:
-
-    ```sh
-    docker image build --tag myappimage .
-    ```
-
-    The ``--tag`` flag defines the tag (effectively: the name) under which the image will be available to run containers with it. The `.` at the end of the command defines the build context, from which docker can copy files into the container (see the `COPY` statement in the Dockerfile). The `.` defines that we simply pass the local directory (recursively with all subdirectories) as the build context. Docker sends the build context to the docker engine as the first step of the build process.
-
-1. After the docker build finishes, the newly created image should be available in the list of images on this docker host. Use the following command to list these images:
-
-    ```sh
-    docker image ls
-    ```
-
-1. Now we can finally run the image as a container:
-
-    ```sh
-    docker container run --name myapp -d -p 80:80 myappimage
-    ```
-
-1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address of your VM (the same you used to log on the machine in the beginnning) as `http://<machine address>`:
-
-   ![The web app served from our container](./media/dotnetcoreapp.png)
-
-Our application is now running in a container and we can access it publically. But it is running on a single VM, which means our application will fail if this single VM fails. Maybe even more important: We would need to secure and manage the VM on our own. In summary: We are still on the level of IaaS (Infrastructure as a Service). With the next level - PaaS (Platform as a Service) - we will get rid of the responsibility for infrastructure and automatically get a much better reliability. That will be the topic for exercises 4 and 5. 
-
-##  Exercise 3.a: **Optional**: Upgrade Dockerfile to use multi-stage build
-
-In the preceding exercise we created our app container by first building and packaging the application outside of the container world by issuing the `dotnet publish -o package` command directly on the VM that currently is our 'development machine'. The resulting package then was copied into our container with the `COPY` command. This works, but to some extent it defeats our original purpose to make sure that the outside world always looks the same to our beloved app. For example, the version of the .NET Core CLI on our dev machine might be another one as the one in the base image `microsoft/dotnet:2.1-aspnetcore-runtime`. Or some system library we rely on behaves slightly differently because some configuration item has been set to another value somewhere in the file system.
-
-To solve this problem, the building and packaging steps themselves should be running in a container as well.
-
-1. For building and packaging a .NET Core app, we need the .NET SDK installed. The base image we used in the preceding exercise only has the runtime, not the SDK, thus we need another base image. Additionally, we need to execute the publish command right within the container, which we can achieve using the `RUN` instruction. Change your Dockerfile to look like this:
-
-   ```Dockerfile
-   FROM microsoft/dotnet:2.1-sdk
-   WORKDIR /source
-   COPY . .
-   RUN dotnet publish --output /app --configuration Release
-   WORKDIR /app
-   ENTRYPOINT ["dotnet", "myapp.dll"]
-   ```
-
-1. (Optional) Build and run the container image again with:
-
-    ```sh
-    docker image build --tag myappimage .
-    docker container rm -f myapp
-    docker container run --name myapp -d -p 80:80 myappimage 
-    ```
-    It should just work as it did before. The only real difference is that we built the whole thing right within our container image and we changed the `WORKDIR` in between. Yet the resulting image is not what we would like to run in production. It contains not only the runtime and our app, it carries the SDK as well. Running this image in production would be like shipping the factory along with the car. The additional files and packages in the image not only make it larger and thus less quick to deploy and start, they only make the image less secure by providing additional attack surface, an attacker might exploit to get access to our application. This needs to be changed.
-
-1. To solve the dilemma that we want to build within the image but we do not want the build tools in the image, we use a concept called Multi Stage Builds. This is achieved with the `AS` keyword that allows us to define a name for an image that can be directly used within the same Dockerfile. This image can then be used in additional images defined in the same Dockerfile to copy files out of it with the `--from` flag.
+1. This exercise is available in two versions. Please choose one:
     
-    Change your dockerfile to look like this:
-    ```Dockerfile
-    # Stage 1
-    FROM microsoft/dotnet:2.1-sdk AS  builder
-    WORKDIR /source
-    COPY . .
-    RUN dotnet publish --output package  --configuration Release
-    # Stage 2
-    FROM  microsoft/dotnet:2.1-aspnetcore-runtime
-    WORKDIR /app
-    COPY --from=builder /source/package .
-    ENTRYPOINT ["dotnet", "myapp.dll"]
-    ```
+    [Create and containerize a .NET Core Web App ](containers_on_azure_3_dotnet.md)
+
+    [Create and containerize a Java Web App (with Maven and Tomcat)](containers_on_azure_3_java.md)
+
+##  Exercise 3.b: **Optional**: Multi Stage Build
+
+In the preceding exercise we created our app container by first building and packaging the application by issuing build commands that worked on the file system of the docker host, our 'development machine'. The resulting package then was copied into our container with the `COPY` command. We did this from a container to avoid version conflicts and other configuration issues that might arise in case we relied on the correctness of the dev machine itself.
+
+While it is a good lab exercise to set up volume mounts and working interactively with the shell inside a running container like this, this approach is much too complex and error prone for a real development workflow.
+
+To solve this problem, the building and packaging steps themselves should be defined in a Dockerfile as well.
+
+1. This exercise is available in two versions. Please choose:
     
-1. Build and run the container image again with:
+    [Multi Stage Build for .NET Core](containers_on_azure_3_b_dotnet.md)
 
-    ```sh
-    docker image build --tag myappimage .
-    docker container rm -f myapp
-    docker container run --name myapp -d -p 80:80 myappimage 
-    ```
+    [Multi Stage Build for Java (with Maven and Tomcat)](containers_on_azure_3_b_java.md)
 
-The second stage in the last Dockerfile produces our production image, which is based on `microsoft/dotnet:2.1-aspnetcore-runtime` again, so that we have a tiny and more secure resulting containerized application again, but still running the build in a container as well.
+ 
 
 ## Exercise 4: Create Azure Container Registry (ACR) and push image
 
@@ -466,8 +347,17 @@ In this challenge, the idea is to be able to use the same container image of our
     ```cs
     var label = Environment.GetEnvironmentVariable("ENVIRONMENT_LABEL");
     ```
+    nd then use that label in the About-String that this controller returns.
 
-    And then use that label in the About-String that this controller returns.
+    Or this for Java (JSP):
+
+    ```HTML
+    <html>
+      <body>
+        <h2>Hello World from environment <%= System.getenv("ENVIRONMENT_LABEL")    %>!</h2>
+      </body>
+    </html>
+    ```
 
 1. Rebuild the image, give it a new tag and push it to the registry.
 
@@ -476,6 +366,7 @@ In this challenge, the idea is to be able to use the same container image of our
     ```sh
     docker container run -e ENVIRONMENT_LABEL=LinuxVM -d -p 80:80 myappimage
     ```
+    (or with `-p 80:8080` for Java)
 
 1. Set the new image name and tag and the environment variables in ACI and App Service.
 
