@@ -20,12 +20,14 @@ Thus, instead of working directly on the docker host machine (our dev machine), 
     This creates the folder for our app development and we change into it. Now continue with this:
 
     ```sh
-    docker run -it --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp maven:3.3-jdk-8 sh 
+    docker container run -it --rm -v "$(pwd)":/usr/src/myapp -w /usr/src/myapp maven:3.3-jdk-8 sh 
     ```
 
-    Phew. Four new concepts introduced in one command. Let's explore them one by one:
+    Phew. So many new concepts introduced in one command. Let's explore them one by one:
 
-    - The two flags `-it` tell docker to run the new container `i`nteractively and attach a `t`erminal to it. This means we will be able to directly work in the container from now on.
+    - The two flags `-it` tell docker to run the new container `i`-nteractively and attach a `t`-erminal to it. This means we will be able to directly work in the container from now on.
+    - The image name `maven:3.3-jdk-8` determines what image will be pulled and run. The image name always needs to be positioned **after** all other flags.
+    - Everything **after** the image name is passed to the entrypoint of the container. For now we can think of it as the command that is being run at starttime. In this case we pass `sh`, which means that we will be running a simple shell. In case our image contains a bash shell as well, we could pass ``bash`` here as well. 
     - Flag `--rm` means that the container will be removed immediately after we are done with it. We will only need the container for performing a few ad-hoc tasks, so it's a good idea to clean up after ourselves immediately and not leave the useless container around.
     - `-v` mounts a folder from the file system of the docker host into the container with the syntax `-v hostfolder:containerfolder`. In this case we want to map the current folder (returned by`$(pwd)`) to be mapped to a folder `/usr/src/myapp` in the container file system. If that folder does not exist in the container yet, it will be created.
     - Finally, we use `-w` to set the working folder to the `/usr/src/myapp` folder we just mapped.
@@ -78,20 +80,22 @@ Thus, instead of working directly on the docker host machine (our dev machine), 
     This creates an empty file with the name 'Dockerfile' and opens the nano text editor to edit the file. Copy and paste the following text into the text editor:
 
     ```Dockerfile
-    FROM tomcat:alpine
+    FROM tomcat
     WORKDIR /usr/local/tomcat/webapps
     COPY myapp/target/myapp.war .
     RUN mv myapp.war ROOT.war
     RUN rm -rf ROOT
     CMD ["catalina.sh", "run"]
     ```
-    This Dockerfile tells docker how to put our app into a container image. In the first line it defines the base image to be used with the `FROM` keyword. Our image will just be a thin additional layer on top of that base image, thus this base image needs to contain everything we need to run our app, in this case that is the ASP.NET Core runtime.
+    This Dockerfile tells docker how to put our app into a container image. In the first line it defines the base image to be used with the `FROM` keyword. Our image will just be a thin additional layer on top of that base image, thus this base image needs to contain everything we need to run our app, in this case that is "tomcat a Java runtime and the tomcat server software in a default configuration.
 
     The `WORKDIR` instruction in the second line defines the working directory for subsequent instructions and - if this is the last `WORKDIR` in the Dockerfile - for the running container. In case the given directory does not yet exist in the file system of the base image, the directory is created by docker.
 
     The `COPY` instruction then copies our application package from the so called build context (more on this in the next steps) into the container image. In this case we use `package` (a path in the build context) on the left side as source and . (a path within the container image starting at the working directory) on the right side as target, which means that we want to copy everything in the *package* folder right into our working directory.
 
-    The `ENTRYPOINT` finally defines what will happen at start time of the container. In this case, we want to start the `catalina.sh` script, which belongs to the tomcat base image configuration. The entrypoint can be any executable with any arguments. The process that is started through the entrypoint defines the lifecycle of the container - the container will stay alive as long as this entry process is alive.
+    With the two `RUN` instructions we set up our web app as the start application for tomcat. Tomcat extracts all .war it finds in its app base directory
+
+    The `CMD` finally defines what will happen at start time of the container. In this case, we want to start the `catalina.sh` script, which belongs to the tomcat base image configuration. The entrypoint can be any executable with any arguments. The process that is started through the entrypoint defines the lifecycle of the container - the container will stay alive as long as this entry process is alive.
 
     The [Docker documentation](https://docs.docker.com/) has more information on [Dockerfile instructions](https://docs.docker.com/engine/reference/builder/) and [best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/).
 
