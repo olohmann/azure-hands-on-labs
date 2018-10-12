@@ -123,4 +123,4 @@ Thus, instead of working directly on the docker host machine (our dev machine), 
 
 Our application is now running in a container and we can access it publically. But it is running on a single VM, which means our application will fail if this single VM fails. Maybe even more important: We would need to secure and manage the VM on our own. In summary: We are still on the level of IaaS (Infrastructure as a Service). With the next level - PaaS (Platform as a Service) - we will get rid of the responsibility for infrastructure and automatically get a much better reliability. That will be the topic for exercises 4 and 5.
 
-[Back to the lab](containers_on_azure.md#exercise4)
+[**Click here for the next exercise**](containers_on_azure.md#exercise3b)
