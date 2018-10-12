@@ -137,19 +137,17 @@ For a start, we will be running a very powerful and lightweight web server calle
     curl http://<container ip>
     ```
 
-## Exercise 3: Create and containerize a Web App
-
-Now that we know how to run a pre-packaged app from a public container registry like Docker Hub, we would like to see the same for our own applications. We will create a new app from scratch (no coding required) and put that into a container image like the nginx image we used in the preceding exercise.
-
- ![Exercise 3 Goal](./media/exercise3.png)
-
-1. First we need to clean up, because we will want to reuse port 80, on which the container from the last exercise is still listening. (**CAUTION:** This will silently remove ALL running and non-running containers):
+1. Before moving on we need to clean up, because we will want to reuse port 80, on which the container from this exercise is still listening. (**CAUTION:** This will silently remove ALL running and non-running containers):
 
     ```sh
     docker container rm -f $(docker container ls -a -q)
     ```
 
     This command consists of two parts: `docker container ls` within the brackets lists all (`-a` flag) containers with only their IDs (`-q` flag). `docker container rm` then takes all these IDs and removes the containers, even if they are still running (`-f`).
+
+## Exercise 3: Create and containerize a Web App
+
+Now that we know how to run a pre-packaged app from a public container registry like Docker Hub, we would like to see the same for our own applications. We will create a new app from scratch (no coding required) and put that into a container image like the nginx image we used in the preceding exercise.
 
 This exercise is available in two versions. Please choose:
 
@@ -160,7 +158,7 @@ This exercise is available in two versions. Please choose:
 
 In the preceding exercise we created our app container by first building and packaging the application by issuing build commands that worked on the file system of the docker host - our 'development machine'. The resulting package then was copied into our container with the `COPY` command. We did this from a container to avoid version conflicts and other configuration issues that might arise in case we relied on the correctness of the dev machine itself.
 
-While it is a good lab exercise to set up volume mounts and working interactively with the shell inside a running container like this, this approach is much too complex and error prone for a real development workflow.
+While it is a good lab exercise to set up volume mounts and working interactively with the shell inside a running container (as we just did), this approach is much too complex and error prone for a real development workflow.
 
 To solve this problem, the building and packaging steps themselves should be defined in a Dockerfile as well.
 

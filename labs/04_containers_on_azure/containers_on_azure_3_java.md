@@ -1,5 +1,7 @@
 ## Exercise 3: Create and containerize a Java Web App (with Maven and Tomcat)
 
+ ![Exercise 3 Goal](./media/exercise3.png)
+
 First we need to create our minimal Java Web App. In a typical develoment setup we would do this by issuing a `mvn archetype:generate` command of the Maven tool directly on the develoment machine. That command bootstraps a minimal project that can run immmediately (as a "walking skeleton") and serves as the start point for incremental development of the real application. We would then build the application and put it into some kind of deployment package.
 
 Yet this approach always bears the risk that the dev machine has some configuration or framework version that does not fit our target environment. And wasn't one of the main goals of containerization to avoid such issues?
