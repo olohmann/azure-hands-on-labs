@@ -50,4 +50,4 @@
 
 The second stage in the last Dockerfile produces our production image, which is based on `microsoft/dotnet:2.1-aspnetcore-runtime` again, so that we have a tiny and more secure resulting containerized application again, but still running the build in a container as well.
 
-[**Click here for the next exercise**](containers_on_azure.md#exercise4)
+[**Click here for the next exercise (Exercise 4)**](containers_on_azure.md#exercise4)

@@ -25,10 +25,10 @@ Thus, instead of working directly on the docker host machine (our dev machine), 
 
     Phew. Four new concepts introduced in one command. Let's explore them one by one:
 
-    * The two flags `-it` tell docker to run the new container `i`nteractively and attach a `t`erminal to it. This means we will be able to directly work in the container from now on.
-    * Flag `--rm` means that the container will be removed immediately after we are done with it. We will only need the container for performing a few ad-hoc tasks, so it's a good idea to clean up after ourselves immediately and not leave the useless container around.
-    * `-v` mounts a folder from the file system of the docker host into the container with the syntax `-v hostfolder:containerfolder`. In this case we want to map the current folder (returned by`$(pwd)`) to be mapped to a folder `/usr/src/myapp` in the container file system. If that folder does not exist in the container yet, it will be created.
-    * Finally, we use `-w` to set the working folder to the `/usr/src/myapp` folder we just mapped.
+    - The two flags `-it` tell docker to run the new container `i`nteractively and attach a `t`erminal to it. This means we will be able to directly work in the container from now on.
+    - Flag `--rm` means that the container will be removed immediately after we are done with it. We will only need the container for performing a few ad-hoc tasks, so it's a good idea to clean up after ourselves immediately and not leave the useless container around.
+    - `-v` mounts a folder from the file system of the docker host into the container with the syntax `-v hostfolder:containerfolder`. In this case we want to map the current folder (returned by`$(pwd)`) to be mapped to a folder `/usr/src/myapp` in the container file system. If that folder does not exist in the container yet, it will be created.
+    - Finally, we use `-w` to set the working folder to the `/usr/src/myapp` folder we just mapped.
     
     In combination, these settings represent a very useful setup: We now have a shell, running directly in the container, with all tools of the container available, but our file system actions in the current directory will be directly mapped to the current folder we just had in the host file system. We are effectively using ready-made and preconfigured tools without having to install them. They just appear magically as long as we need them and then they are gone again.
 
@@ -133,4 +133,4 @@ Thus, instead of working directly on the docker host machine (our dev machine), 
 
 Our application is now running in a container and we can access it publically. But it is running on a single VM, which means our application will fail if this single VM fails. Maybe even more important: We would need to secure and manage the VM on our own. In summary: We are still on the level of IaaS (Infrastructure as a Service). With the next level - PaaS (Platform as a Service) - we will get rid of the responsibility for infrastructure and automatically get a much better reliability. That will be the topic for exercises 4 and 5.
 
-[**Click here for the next exercise**](containers_on_azure.md#exercise3b)
+[**Click here for the next exercise (Exercise 3.b)**](containers_on_azure.md#exercise3b)
