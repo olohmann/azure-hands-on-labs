@@ -151,29 +151,27 @@ Now that we know how to run a pre-packaged app from a public container registry 
 
     This command consists of two parts: `docker container ls` within the brackets lists all (`-a` flag) containers with only their IDs (`-q` flag). `docker container rm` then takes all these IDs and removes the containers, even if they are still running (`-f`).
 
-1. This exercise is available in two versions. Please choose one:
-    
-    [Create and containerize a .NET Core Web App ](containers_on_azure_3_dotnet.md)
+This exercise is available in two versions. Please choose:
 
-    [Create and containerize a Java Web App (with Maven and Tomcat)](containers_on_azure_3_java.md)
+* [Create and containerize a **.NET Core** Web App ](containers_on_azure_3_dotnet.md)
+* [Create and containerize a **Java** Web App (with Maven and Tomcat)](containers_on_azure_3_java.md)
 
-##  Exercise 3.b: **Optional**: Multi Stage Build
+## <a name="exercise3b"></a> Exercise 3.b: **Optional**: Multi Stage Build
 
-In the preceding exercise we created our app container by first building and packaging the application by issuing build commands that worked on the file system of the docker host, our 'development machine'. The resulting package then was copied into our container with the `COPY` command. We did this from a container to avoid version conflicts and other configuration issues that might arise in case we relied on the correctness of the dev machine itself.
+In the preceding exercise we created our app container by first building and packaging the application by issuing build commands that worked on the file system of the docker host - our 'development machine'. The resulting package then was copied into our container with the `COPY` command. We did this from a container to avoid version conflicts and other configuration issues that might arise in case we relied on the correctness of the dev machine itself.
 
 While it is a good lab exercise to set up volume mounts and working interactively with the shell inside a running container like this, this approach is much too complex and error prone for a real development workflow.
 
 To solve this problem, the building and packaging steps themselves should be defined in a Dockerfile as well.
 
-1. This exercise is available in two versions. Please choose:
-    
-    [Multi Stage Build for .NET Core](containers_on_azure_3_b_dotnet.md)
+This exercise is available in two versions. Please choose:
 
-    [Multi Stage Build for Java (with Maven and Tomcat)](containers_on_azure_3_b_java.md)
+* [Multi Stage Build for **.NET Core**](containers_on_azure_3_b_dotnet.md)
+* [Multi Stage Build for **Java** (with Maven and Tomcat)](containers_on_azure_3_b_java.md)
 
  
 
-## Exercise 4: Create Azure Container Registry (ACR) and push image
+## <a name="exercise4"></a> Exercise 4: Create Azure Container Registry (ACR) and push image
 
 So far we only ran the container on our own docker host (our Linux VM). To be able to deploy to other container environments, we need a [registry](https://docs.docker.com/registry/). We will push our image to the registry, so that others can pull it from there. Azure offers a managed service for this, called Azure Container Registry (ACR), which we will use in this lab.
 
