@@ -25,9 +25,9 @@ Thus, instead of working directly on the docker host machine (our dev machine), 
 
     Phew. So many new concepts introduced in one command. Let's explore them one by one:
 
-    - The two flags `-it` tell docker to run the new container `i`nteractively and attach a `t`erminal to it. This means we will be able to directly work in the container from now on.
+    - The two flags `-it` tell docker to run the new container `i`-nteractively and attach a `t`-erminal to it. This means we will be able to directly work in the container from now on.
     - The image name `microsoft/dotnet:2.1-sdk` determines what image will be pulled and run. The image name always needs to be positioned **after** all other flags.
-    - Everything **after** the image name is passed to the entrypoint of the container. For now we can think of it as the command that is being run at starttime. In this case we pass `sh`, which means that we will be running a simple shell. In case our image contains a bash shell as well, we could pass ``bash`` here as well. 
+    - Everything **after** the image name is passed to the entrypoint of the container. For now we can think of it as the command that is being run at starttime. In this case we pass `sh`, which means that we will be running a simple shell. In case our image contains a bash shell, we could pass ``bash`` here as well. 
     - Flag `--rm` means that the container will be removed immediately after we are done with it. We will only need the container for performing a few ad-hoc tasks, so it's a good idea to clean up after ourselves immediately and not leave the useless container around.
     - `-v` mounts a folder from the file system of the docker host into the container with the syntax `-v hostfolder:containerfolder`. In this case we want to map the current folder (returned by`$(pwd)`) to be mapped to a folder `/usr/src/myapp` in the container file system. If that folder does not exist in the container yet, it will be created.
     - Finally, we use `-w` to set the working folder to the `/usr/src/myapp` folder we just mapped.

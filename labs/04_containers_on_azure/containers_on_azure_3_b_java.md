@@ -12,7 +12,7 @@ The additional files and packages in the image not only make it larger and thus 
     FROM maven:3.3-jdk-8 AS builder
     WORKDIR /usr/src/myapp
     COPY myapp .
-    RUN mvn clean install
+    RUN mvn clean package
     
     # Stage 2: Build the production image
     FROM tomcat:alpine
