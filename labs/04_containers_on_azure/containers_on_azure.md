@@ -175,7 +175,7 @@ So far we only ran the container on our own docker host (our Linux VM). To be ab
 
  ![Exercise 4 Goal](./media/exercise4.png)
 
-1. Open the Cloud Shell (in case you are stilled logged into the VM, just type `exit` and you should be back).
+1. Open the Cloud Shell (in case you are stilled logged in to the VM, just type `exit` and you should be back).
 
 1. Create an ACR with Azure CLI:
 
@@ -184,8 +184,8 @@ So far we only ran the container on our own docker host (our Linux VM). To be ab
     ```
 
     Where...
-    *  `<registry name>` is a name that you can freely choose, but that must still be available as `<registry name>.azurecr.io`.
-    *  `<resorce group>` is the name of the rexource group that you have contributor permissions to (when in doubt, ask your instructor).
+    *  `<registry name>` is a name that you can freely choose, but that **should** consist only of lowercase characters and must still be available as `<registry name>.azurecr.io`.
+    *  `<resorce group>` is the name of the resource group that you have contributor permissions to (when in doubt, ask your instructor).
 
     Now we have our own private registry running in Azure available at `<registry name>.azurecr.io`. We say that it is a **private** registry (although it is running in the public cloud), because it is protected by authentication. By default, access to the registry is restricted to identities that were granted permissions through Azure Active Directory (AAD) and Role Based Access Control (RBAC). Yet for the purpose of this lab, we will use an easier option: A credentials based authentication mechanism called the [Admin account](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account). To enable it and get the credentials, use these commands:
 
