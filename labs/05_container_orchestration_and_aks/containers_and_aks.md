@@ -30,8 +30,6 @@ Estimated time to complete this lab: **120-180** minutes.
 
 ## Exercise 1: Log on to your VM
 
- ![Exercise 1 Goal](./media/exercise1.png)
-
 1. Open the [Azure Portal](https://portal.azure.com), log on with your lab account, if necessary. You can see the currently logged on account in the top right of the portal:
 
     ![Loggend on account in Azure portal](./media/portalloggedonuser.png)
