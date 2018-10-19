@@ -68,6 +68,10 @@ Estimated time to complete this lab: **120-180** minutes.
     docker --version 
     ```
     This should display the docker version.
+---
+**Tip:** *You can open another instance of cloud shell by starting a new browser tab or window and navigating to [https://shell.azure.com](https://shell.azure.com). This way you can easily switch between the VM and the cloud shell.*
+
+---
 
 ## Exercise 2: Build the container images for our app
 
@@ -259,11 +263,9 @@ As the images are pushed to our registry already, we can control the deployment 
 
     This will show us all nodes (machines) that are part of our cluster. If this does not work, it could be that the cluster creation has not finished yet. You might want to check that in the Azure portal in the "Deployments" section of your resource group.
 
-1. The actual deployment is done using configuration files in yaml that are applied to the cluster. We will use a nice text editor for it called `code`. In the cloud shell type:
+1. The actual deployment is done using configuration files in yaml that are applied to the cluster. We will use a nice text editor for this, that is directly integrated into the cloud shell. In the toolbar of the shell click **Open editor**:
 
-    ```sh
-    code
-    ```
+    ![Open editor](media/openeditor.png)
 
     This opens a text editor above the shell.
 
@@ -385,6 +387,11 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
     ```
     Until the service has an external IP.
 
+
+TODO> Exec into a pod to see the API internally
+
+
+
 1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address of the service like this `http://<external service IP>`. The app should be running and showing its full functionality, however limited that might be.
 
 1. Add a few messages in the app and see how each one is nicely added to the list. This is because we chose for the `myapi` deployment to only have one replica. This is by no means a sound implementation though. As the container keeps the list only in memory without any persistence layer in the background, this service cannot be load balanced and will lose all its state on each restart of the pod.
@@ -400,6 +407,8 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
 1. Watch what is going on with repeatedly using `kubectl get pod --selector app=myapi`.
 
     There are two interesing things happening now: The deployment (controller) finds out that the desired number of pods is not running any longer and starts a new one. And once that new pod is up and running, our application has lost all its state, which you can see by using our app in the browser again. 
+
+TODO: Scale API up to three or more replicas, explain effects
 
 ## Exercise 7: Enable Helm and deploy full application as a Helm chart
 
