@@ -21,10 +21,11 @@ In this hands-on lab, you will learn how to:
 ### Prerequisites
 
 Typically these should be preconfigured for you (if in doubt, ask your instructor):
-- An active Azure subscription or resource group to which you have contributor permissions.
-- An Ubuntu Linux machine running in Azure with access to the cloud and:
-    - Docker installed ([installation instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/))
-    - Git installed ([installation instructions](https://git-scm.com/download/linux))
+* An active Azure subscription or resource group to which you have contributor permissions.
+* An Ubuntu Linux machine running in Azure with access to the cloud and:
+    * Docker installed ([installation instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/)).
+    * Git installed ([installation instructions](https://git-scm.com/download/linux))
+
 ---
 
 Estimated time to complete this lab: **120-180** minutes.
@@ -406,7 +407,7 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
     apk add curl
     curl http://myapi:8080/greetings
     ```
-    The first command installs the `curl` tool, which is not included in our small production image by default. The second line then uses `curl` to talk to the API under its internal cluster service address and get the list of "greetings" that are currently stored. You should get an empty list ('`[]`') as result, because we did not add any greetings yet. That will come in the next steps.
+    The first command installs the `curl` tool, which is not included in our small production image by default. The second line then uses `curl` to talk to the API at its internal cluster service address and get the list of "greetings" that are currently stored. You should get an empty list ('`[]`') as result, because we did not add any greetings yet. That will come in the next steps.
 
 1. Exit the shell in the pod by typing `exit`.
 
@@ -429,7 +430,7 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
 
     This deletes the `myapi` pod. But this time, instead of manually copying the dynamic pod name (like we did before to exec into it), we used a trick this time. We called `kubectl get pod` inside the `$()` block with a selector and query that simply returns the dynamic name of the first `myapi` pod. This way we can do it in one step.
 
-1. Watch what is going on with repeatedly using `kubectl get pod --selector app=myapi`.
+1. Watch what is going on by repeatedly using `kubectl get pod --selector app=myapi`.
 
     There are two interesing things happening now: The deployment (or its ReplicaSet) finds out that the desired number of pods is not running any longer and starts a new one. And once that new pod is up and running, our application has lost all its state, which you can see by using our app in the browser again.
 
@@ -439,6 +440,11 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
 
     ```sh
     kubectl exec -it $(kubectl get pod --selector app=myapp -o jsonpath='{.items[0].metadata.name}') sh
+    ```
+
+    And then, inside the pod:
+
+    ```sh
     apk add curl
     curl http://myapi:8080/greetings
     ```
