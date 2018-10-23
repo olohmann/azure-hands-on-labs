@@ -4,9 +4,9 @@
 
 Containers provide a great solution to isolate individual apps and services from the rest of the world, so that they can run anywhere and require no special configuration regarding the target platform on which they run. Yet containerization alone deals mostly at the level of processes and does not answer many of the questions that arise when running services in production - like service discovery, load balancing, reliability and so on. This is typically addressed using container orchestration tools. Kubernetes has emerged as an industry-wide de-facto standard for container orchestration. Kubernetes originated from a group of Google engineers who destilled much of their learnings with container orchestration into an open source project. That project quickly gained reputation for the quality of its design and created a vibrant community and ecosystem.
 
-One central advantage of Kubernetes is its declarative [API concept](https://kubernetes.io/docs/concepts/overview/kubernetes-api/) that does not only provide for an unmatched elegance in deigning desired state of a distributed application, but as well is available transparently on any Kubernetes cluster, regardless of where it runs, on premises or on any cloud provider. 
+One central advantage of Kubernetes is its declarative [API concept](https://kubernetes.io/docs/concepts/overview/kubernetes-api/) that does not only provide for an unmatched elegance in designing desired state of a distributed application, but as well is available transparently on any Kubernetes cluster, regardless of where it runs, on premises or on any cloud provider. 
 
-Setting up and maintaining a Kubernetes cluster is far from trivial though, which is wy a managed service like Azure Kubernetes Service (AKS), can greatly accelerate the adoption of Kubernetes.
+Setting up and maintaining a Kubernetes cluster is far from trivial though, which is wy a managed service like Azure Kubernetes Service (AKS), can greatly accelerate the adoption and ease the operation of Kubernetes.
 
 ### Objectives
 
@@ -15,11 +15,12 @@ In this hands-on lab, you will learn how to:
 - Create an AKS cluster
 - Push multi-container applications to Azure Container Registries (ACR) using docker-compose
 - Orchestrate multi-container applications in AKS using kubectl, the Kubernetes Command Line Interface
-- Use Helm charts to simplify Kubernetes deployments and upgrades
+
+[//]: # (- Use Helm charts to simplify Kubernetes deployments and upgrades)
 
 ### Prerequisites
 
-Typically these should be preconfigured for your (if in doubt, ask your instructor):
+Typically these should be preconfigured for you (if in doubt, ask your instructor):
 - An active Azure subscription or resource group to which you have contributor permissions.
 - An Ubuntu Linux machine running in Azure with access to the cloud and:
     - Docker installed ([installation instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/))
@@ -344,7 +345,7 @@ As the images are pushed to our registry already, we can control the deployment 
     kubectl delete pod myapp
     ```
 
-## Exercise 6: Deploy Services with `kubectl`
+## Exercise 6: Deploy Deployments and Services with `kubectl`
 
 So far we only deployed a pod that is not accessible from the outside. Now we should go on and deploy the full solution.
 
@@ -355,19 +356,22 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
     ```
 1. Change into the directory '`greetings/k8s/config`'. This directory contains one config file for our `myapp` service and one for `myapi`.
 
-1. Start the `code` editor again for '`myapp.yaml`':
+1. Start the `code` editor again (if it is not running already) and open the file '`myapp.yaml`'.
 
-    ```sh
-    code myapp.yaml
-    ```
+1. In the code editor, scroll to the bottom of the '`myapp.yaml`' file and locate the image name '`<registry name>.azurecr.io/myapp:v1.0`'. Change this to the name of your registry. Save the file, but do not close it yet.
 
-1. In the code editor, scroll to the bottom of the '`myapp.yaml`' file and locate the image name '`<registry name>.azurecr.io/myapp:v1.0`'. Change this to the name of your registry. Save the file.
+1. Explore the config file. Note that it defines two objects: A `Deployment` and a `Service`. This ist the most common setup for applications in Kubernetes:
 
-    TODO: Explain Deployment and Service a bit
+    * Instead of having just one pod, which might die and is a single point of failure, we define a `Deployment` that defines a template for pods and how many `replicas` of that template we would like to have. The [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) (or better: its implicitly created [ReplicaSet](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)) then continually watches the actual number of pods and (if that does not match the desired replica count) either deletes pods or creates new pods accordingly. Additionally to that scaling functionality, it as well takes care of upgrading to new versions of container images with zero downtime using [rolling updates](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment).
+    * In order for the consumer of the pods to have a single address it can connect to (instead of figuring out on it's own to which of the potentially many pods it should connect), we define the `Service`. The [service](https://kubernetes.io/docs/concepts/services-networking/service/) acts as a facade in front of the pods and provides a single constant address for consumers to use. The `myapp` service should be available externally, which we achieve with its `type: LoadBalancer`, and has a selector `app: myapp`, which means that the service will load balance requests to all pods with that label (note that our deployment defines exactly that label in the file).
 
-1. Repeat the steps to change the image name for file '`myapi.yaml`'.
+    The last three lines in '`myapp.yaml`' set an environment label for the `myapp` container, the `API_BASE_URL`, which is the url our app uses for accessing our API service (you can see that in [this code file](https://github.com/cadullms/greetings/blob/master/myapp/src/main/java/com/example/myapp/GreetingController.java)). Leave the value for this as 'http://myapi:8080'. In the next step we will find out why that address will perfectly work here.
 
-1. Apply both config files:
+1. Repeat the steps to change the image name for file '`myapi.yaml`' (but do not close it yet).
+
+1. Explore the '`myapi.yaml`' file. The `myapi` service is only available inside the cluster (`type: ClusterIP`) and the internal DNS service in the cluster will automatically resolve the service name '`myapi`' to the IP address of the service. Thus, the `myapp` pods will always be able to access the API service at http://myapi:8080. 
+
+1. Apply both config files to our cluster:
 
     ```sh
     kubectl apply -f myapp.yaml
@@ -380,17 +384,38 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
     ```
     This will show three services, two of them ours. The myapp service is the only one that should get an external IP. The external IP for the myapp service most probably is still `<pending>`. This is because just now the cluster is talking to the Azure API to create a new public IP for it.
 
+    While this is happening, we can alredy do something in parallel...
+
+1. We can experience the internal service discovery by logging on to one of our `myapp` pods. First we need to find out one of the dynamically created names of the pods:
+
+    ```sh
+    kubectl get pods
+    ```
+    This will show all pods. Copy out one of the names starting with `myapi'.
+
+1. With the copied name,  execute:
+
+    ```sh
+    kubectl exec -it <pod name> sh
+    ```
+    This will open a shell right within the running pod.
+
+1. In the new shell, type:
+
+    ```sh
+    apk add curl
+    curl http://myapi:8080/greetings
+    ```
+    The first command installs the `curl` tool, which is not included in our small production image by default. The second line then uses `curl` to talk to the API under its internal cluster service address and get the list of "greetings" that are currently stored. You should get an empty list ('`[]`') as result, because we did not add any greetings yet. That will come in the next steps.
+
+1. Exit the shell in the pod by typing `exit`.
+
 1. Repeat:
 
     ```sh
     kubectl get svc
     ```
-    Until the service has an external IP.
-
-
-TODO> Exec into a pod to see the API internally
-
-
+    Until the `myapp` service has an external IP.
 
 1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address of the service like this `http://<external service IP>`. The app should be running and showing its full functionality, however limited that might be.
 
@@ -402,22 +427,41 @@ TODO> Exec into a pod to see the API internally
     kubectl delete pod $(kubectl get pod --selector app=myapi -o jsonpath='{.items[0].metadata.name}')
     ```
 
-    TODO: Explain the magic.
+    This deletes the `myapi` pod. But this time, instead of manually copying the dynamic pod name (like we did before to exec into it), we used a trick this time. We called `kubectl get pod` inside the `$()` block with a selector and query that simply returns the dynamic name of the first `myapi` pod. This way we can do it in one step.
 
 1. Watch what is going on with repeatedly using `kubectl get pod --selector app=myapi`.
 
-    There are two interesing things happening now: The deployment (controller) finds out that the desired number of pods is not running any longer and starts a new one. And once that new pod is up and running, our application has lost all its state, which you can see by using our app in the browser again. 
+    There are two interesing things happening now: The deployment (or its ReplicaSet) finds out that the desired number of pods is not running any longer and starts a new one. And once that new pod is up and running, our application has lost all its state, which you can see by using our app in the browser again.
 
-TODO: Scale API up to three or more replicas, explain effects
+1. Add a few new messages in the app.
 
-## Exercise 7: Enable Helm and deploy full application as a Helm chart
+1. Now let's see how these new messages are represented internally:
 
-TBD
+    ```sh
+    kubectl exec -it $(kubectl get pod --selector app=myapp -o jsonpath='{.items[0].metadata.name}') sh
+    apk add curl
+    curl http://myapi:8080/greetings
+    ```
 
-## Extra Challenge: Add a Database
+    This time, unlike our first try, you should see some messages being returned as JSON from the API.
+
+1. **Optional**: Change the number of replicas in '`myapi.yaml`', reapply with `kubectl apply -f`, add a few messages in the app and see how the behavior of the app gets fully unpredictable for a replica count larger than 1.
 
 ---
 
-## Summary
+## Summary and Outlook
 
-Yay!
+We saw how to work with Docker, AKS and ACR to create a multi-container app with an approach that would work in mostly the same way for much larger microservice based apps as well.
+
+For a real application, the next step would be to add state. There are two major options for this:
+
+* Keep all state in an external managed service like Azure SQL, Azure MySQL, Azure CosmosDB, Table or Blob storage or any other kind of managed persistance layer. This is the recommended approach, because management, backup, replication, synchronization and efficient scaling of stateful services are all hard but generic problems that managed services can typically solve very well for you, so that you can focus on the development of your application.
+* Keep state in a containerized service in your cluster. This adds another dimension of complexity to your setup. As containers are ephemeral by definition (their file system is only temporary), you will need to have external state mapped into your containers then. This can be solved in Azure with [persistent volumes](https://docs.microsoft.com/en-us/azure/aks/concepts-storage#persistent-volumes).
+
+A typical scenario would be to combine those approaches. There are many predefined container images for database systems available on Docker hub like SQL Server, MySQL, MongoDB, and so on. These are ideal candidates for speeding up your development workflow: You never need to set up a database, but are free to spin up a new environment whenever you need one, e.g. for a quick experiment or test automation scenarios. You would include these in your docker-compose files or your local Kubernetes installation, but ideally without persistent state. The initial state should come from an init script or the app could init your dev/test database on its own.
+
+For production you would choose the full featured managed service. Yet having that managed service be defined somewhere outside of Kubernetes objects would break our promise: Making everything portable by only defining configuration through the Kubernetes API, which is the same regardless of where the cluster is running. This problem is addressed by the [Open Service Broker](https://www.openservicebrokerapi.org/) concept. With that, you can define your backend services in a generic way right through the Kubernetes API and the service broker will take care of the platform specifics (See [this walkthrough](https://github.com/Azure/open-service-broker-azure/blob/master/docs/quickstart-aks.md#quickstart-open-service-broker-for-azure-on-an-azure-container-service-managed-cluster) of how to enable this for Azure).
+
+Finally, [helm charts](https://docs.helm.sh/developing_charts/) are a very elegant way to have a single configuration capable of supporting all mentioned approaches: Containerized state for dev and managed state for prod with backend services defined through Open Service Broker.
+
+All of this will be the topics of an upcoming lab...
