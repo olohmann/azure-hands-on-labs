@@ -265,7 +265,9 @@ As the images are pushed to our registry already, we can control the deployment 
 
 1. To verify, let's try a very simple operation:
 
+    ```sh
     kubectl get nodes
+    ```
 
     This will show us all nodes (machines) that are part of our cluster. If this does not work, it could be that the cluster creation has not finished yet. You might want to check that in the Azure portal in the "Deployments" section of your resource group.
 
