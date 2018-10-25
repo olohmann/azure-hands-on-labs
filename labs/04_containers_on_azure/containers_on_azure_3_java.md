@@ -120,7 +120,7 @@ Thus, instead of working directly on the docker host machine (our dev machine), 
 1. Now we can finally run the image as a container:
 
     ```sh
-    docker container run --name myapp -d -p 80:80 myappimage
+    docker container run --name myapp -d -p 80:8080 myappimage
     ```
 
 1. On your own machine (not the Lab-VM), open the web browser of your choice and navigate to the address of your VM (the same you used to log on the machine in the beginnning) as `http://<machine address>`:
