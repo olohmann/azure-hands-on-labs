@@ -167,13 +167,15 @@ The next step is to create an AKS cluster to run our application in with a compl
 1. Create the AKS cluster with Azure CLI:
 
     ```sh
+    az provider register --namespace Microsoft.ContainerService
     az aks create --name <cluster name> --resource-group <resource group> --generate-ssh-keys
     ```
 
     Where...
     *  `<cluster name>` is a name that you can freely choose, but that must still be available (the tool will tell you if it is).
     *  `<resorce group>` is the name of the resource group that you have contributor permissions to (when in doubt, ask your instructor).
-
+    *  The command `az provider register --namespace Microsoft.ContainerService` is not needed in most cases, yet some subscriptions do not have the provider installed by default and reregistering it is a safe operation.
+    
     This creates an AKS cluster with three agent (worker) nodes with default sizes and default settings. It as well creates an additional resource group in your Azure subscription and a so-called Service Principal (SP) in your Azure Active Directory (AAD). The SP is the technical identity (like a service account) that our cluster will later use to authenticate against the Azure Resource Manager API (ARM API). This is needed because certain operations, like publishing a service to the internet, require new Azure resources like a public IP that will be created by the cluster on-the-fly.
     
     ![AKS Cluster and SP](./media/aksclusterandsp.png)
@@ -250,6 +252,8 @@ As the images are pushed to our registry already, we can control the deployment 
     ```sh
     az aks install-cli
     ```
+    You might get an "access denied" error for this command in the cloud shell, in case the kubectl is already installed. In that case, we will use the already installed version. Ignore the error message and go on. 
+
 1. Additionally, we need to be able to authenticate against our cluster. This is typically achieved with a private key in a file with the path '.kube/config' in our user profile. To get this file, `az` can help us again:
 
     ```sh
