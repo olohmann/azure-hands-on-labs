@@ -15,8 +15,7 @@ In this hands-on lab, you will learn how to:
 - Create an AKS cluster
 - Push multi-container applications to Azure Container Registries (ACR) using docker-compose
 - Orchestrate multi-container applications in AKS using kubectl, the Kubernetes Command Line Interface
-
-[//]: # (- Use Helm charts to simplify Kubernetes deployments and upgrades)
+- Use Helm charts to simplify Kubernetes deployments and upgrades
 
 ### Prerequisites
 
@@ -70,6 +69,18 @@ Estimated time to complete this lab: **120-180** minutes.
     docker --version 
     ```
     This should display the docker version.
+
+1. We will as well need a tool called `docker--compose', which is not installed by default along with Docker on Linux machines. Check this:
+
+    ```sh
+    docker-compose --version
+    ```
+    If this reports that docker-compose is not installed or the version is lower than 1.22.0, please install docker-compose:
+
+    ```sh
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
+    sudo chmod +x /usr/bin/docker-compose
+    ```
 ---
 **Tip:** *You can open another instance of cloud shell by starting a new browser tab or window and navigating to [https://shell.azure.com](https://shell.azure.com). This way you can easily switch between the VM and the cloud shell.*
 
@@ -172,7 +183,7 @@ The next step is to create an AKS cluster to run our application in with a compl
     ```
 
     Where...
-    *  `<cluster name>` is a name that you can freely choose, but that must still be available (the tool will tell you if it is).
+    *  `<cluster name>` is a name that you can freely choose, but that must still be available (the tool will tell you if it is). **Note**: Casing differences can become problematic here, so please use only lower case characters for the name!
     *  `<resorce group>` is the name of the resource group that you have contributor permissions to (when in doubt, ask your instructor).
     *  The command `az provider register --namespace Microsoft.ContainerService` is not needed in most cases, yet some subscriptions do not have the provider installed by default and reregistering it is a safe operation.
     
@@ -197,7 +208,7 @@ So far we only ran the containers on our own docker host (our Linux VM). To be a
     ```
 
     Where...
-    *  `<registry name>` is a name that you can freely choose, but that **should** consist only of lowercase characters and must still be available as `<registry name>.azurecr.io`.
+    *  `<registry name>` is a name that you can freely choose, but that **should** consist only of lowercase characters and must still be available as `<registry name>.azurecr.io`.  **Note**: Casing differences can become problematic here, so please use only lower case characters for the name!
     *  `<resorce group>` is the name of the resource group that you have contributor permissions to (when in doubt, ask your instructor).
 
     Now we have our own private registry running in Azure available at `<registry name>.azurecr.io`. We say that it is a **private** registry (although it is running in the public cloud), because it is protected by authentication. By default, access to the registry is restricted to identities that were granted permissions through Azure Active Directory (AAD) and Role Based Access Control (RBAC). Yet for the purpose of this lab, we will use an easier option: A credentials based authentication mechanism called the [Admin account](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account). To enable it and get the credentials, use these commands:
