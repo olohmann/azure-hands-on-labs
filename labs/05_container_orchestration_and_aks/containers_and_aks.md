@@ -230,7 +230,7 @@ So far we only ran the containers on our own docker host (our Linux VM). To be a
 
     ```sh
     export REGISTRY="<registry name>.azurecr.io/"
-    export REGISTRY="v1.0"
+    export TAG="v1.0"
     docker-compose build
     docker-compose push
     ```
@@ -407,7 +407,7 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
     apk add curl
     curl http://myapi:8080/greetings
     ```
-    The first command installs the `curl` tool, which is not included in our small production image by default. The second line then uses `curl` to talk to the API at its internal cluster service address and get the list of "greetings" that are currently stored. You should get an empty list ('`[]`') as result, because we did not add any greetings yet. That will come in the next steps.
+    The first command installs the `curl` tool, which is not included in our small production image by default. The second line then uses `curl` to talk to the API at it's internal cluster service address and get the list of "greetings" that are currently stored. You should get an empty list ('`[]`') as result, because we did not add any greetings yet. That will come in the next steps.
 
 1. Exit the shell in the pod by typing `exit`.
 
