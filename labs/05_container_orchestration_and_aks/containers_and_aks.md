@@ -182,7 +182,7 @@ The next step is to create an AKS cluster to run our application in with a compl
     
     These dynamic resources will all be created in the additional resource group. Thus, AKS adds the SP to the resource group as a contributor. 
 
-    The `az` command should still be running, yet we do not need to wait for it to finish. You can safely exit it with `Ctrl+C` and it will continue in the background.
+    The `az` command should still be running, yet we do not need to wait for it to finish. As soon as the command says '..Running...' you can safely exit it with `Ctrl+C` and the deployment will continue in the background.
 
 ## Exercise 4: Create Azure Container Registry (ACR) and push image
 
@@ -252,7 +252,7 @@ As the images are pushed to our registry already, we can control the deployment 
     ```sh
     az aks install-cli
     ```
-    You might get an "access denied" error for this command in the cloud shell, in case the kubectl is already installed. In that case, we will use the already installed version. Ignore the error message and go on. 
+    **Note**: You might get an "access denied" error for this command in the cloud shell in case the kubectl is already installed. In that case, we will use the already installed version. Ignore the error message and go on. 
 
 1. Additionally, we need to be able to authenticate against our cluster. This is typically achieved with a private key in a file with the path '.kube/config' in our user profile. To get this file, `az` can help us again:
 
@@ -456,6 +456,48 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
     This time, unlike our first try, you should see some messages being returned as JSON from the API.
 
 1. **Optional**: Change the number of replicas in '`myapi.yaml`', reapply with `kubectl apply -f`, add a few messages in the app and see how the behavior of the app gets fully unpredictable for a replica count larger than 1.
+
+## Exercise 7 (**Optional**): Deploy with Helm
+
+Creating, maintaining and applying Kubernetes config files can become complex and error-prone, especially for applications with many services. As well, if different scenarios require different configurations for a part of the application (e.g. either the database layer is delivered as containers as well or external databases are used), with config files the user applying the files would need to know which ones to deploy and which not.
+
+This is when [Helm](https://docs.helm.sh/helm/) charts come into play. The main advantage of Helm charts is that they provide an easy way of templating an arbitrary number of Kubernetes config files that together form one application. Another great feature of Helm is a repository concept much like the Docker repository concepts, only for Kubernetes apps consisiting of many containers, but that is out of the scope for this lab. With the templating feature of Helm, we can aggregate our yaml files into one cohesive chart and parameterize values that we would like to be able to change at deploy time like in our case the registry and the image tags.
+
+1. Before we can use Helm, we need to prepare our cluster for it. Helm is basically only a client tool (already installed in the cloud shell) that relies on a service called `tiller`, which must be installed in the cluster. That service then performs the actual deployment of Kubernetes objects. Yet AKS clusters are by default installed with Role Based Access Control (RBAC), which enables restricting permissions for certain operations to specific roles. By default, none of the services running in an AKS cluster can create or change other resources in the cluster. This can only be achieved if the service is using a so-called service account, which has a role assigned with the needed permissions. Let's do this:
+
+    ```sh
+    kubectl -n kube-system create serviceaccount tiller
+    kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+    helm init --service-account=tiller
+    ```
+1. Now, to be able to redeploy our app with Helm, we need to delete our current objects:
+
+    ```sh
+    kubectl delete pod myapp
+    kubectl delete pod myapi
+    kubectl delete svc myapp
+    kubectl delete svc myapi
+    ```
+1. Change into the directory where our Helm chart is located, e.g.:
+
+    ```sh
+    cd ~/greetings/k8s/helm
+    ```
+1. Explore the files in this directory:
+
+    * `Chart.yaml` contains some meta information like name and version of the chart.
+    * `templates/myapp.yaml` contains deployment and service for our app, but with a few parameters in Go template notation in curly braces, like `{{.Values.registry}}` for the registry from which the image should be pulled.
+    * `templates/myapi.yaml` contains deployment and service for the api, again with parameters.
+    * `values.yaml` contains the default values for the parameters.
+
+1. Now we will install the chart (replace `<registry name>` with your own registry's name):
+
+    ```sh
+    helm install . --set registry=<registry name>.azurecr.io
+    ```
+    The `.` specifies that we want to install the chart in the current directory, the `--set` flag overrides the default value for the registry in our `values.yaml` file (which would not work anyways).
+
+1. Check the pods' health and service IP again with `kubectl get pod` and `kubectl get svc` and make sure the application works again by browsing its public IP.
 
 ---
 
