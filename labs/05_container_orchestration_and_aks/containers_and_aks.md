@@ -357,6 +357,8 @@ As the images are pushed to our registry already, we can control the deployment 
 
 1. Now back in the cloud shell, try `kubectl get pod myapp` for a few times. It should eventually switch from the "ImagePullBackOff" state to "Running", which means that your pod is running the container it pulled from your private registry.
 
+    If this takes too long, you can as well `kubectl delete pod myapp` and then `kubectl apply -f myapp-pod.yaml` again, to speed up the process.
+
 1. Clean up: 
 
     ```sh
