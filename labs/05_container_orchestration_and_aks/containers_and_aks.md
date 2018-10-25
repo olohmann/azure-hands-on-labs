@@ -461,18 +461,23 @@ So far we only deployed a pod that is not accessible from the outside. Now we sh
 
 ## Exercise 7 (**Optional**): Deploy with Helm
 
-Creating, maintaining and applying Kubernetes config files can become complex and error-prone, especially for applications with many services. As well, if different scenarios require different configurations for a part of the application (e.g. either the database layer is delivered as containers as well or external databases are used), with config files the user applying the files would need to know which ones to deploy and which not.
+Creating, maintaining and applying Kubernetes config files can become complex and error-prone, especially for applications with many services. As well, if different scenarios require different configurations for a part of the application (e.g.  the database layer is either delivered as containers or external databases are used), with config files, the user applying the files would need to know which ones to deploy and which not.
 
 This is when [Helm](https://docs.helm.sh/helm/) charts come into play. The main advantage of Helm charts is that they provide an easy way of templating an arbitrary number of Kubernetes config files that together form one application. Another great feature of Helm is a repository concept much like the Docker repository concepts, only for Kubernetes apps consisiting of many containers, but that is out of the scope for this lab. With the templating feature of Helm, we can aggregate our yaml files into one cohesive chart and parameterize values that we would like to be able to change at deploy time like in our case the registry and the image tags.
 
-1. Before we can use Helm, we need to prepare our cluster for it. Helm is basically only a client tool (already installed in the cloud shell) that relies on a service called `tiller`, which must be installed in the cluster. That service then performs the actual deployment of Kubernetes objects. Yet AKS clusters are by default installed with Role Based Access Control (RBAC), which enables restricting permissions for certain operations to specific roles. By default, none of the services running in an AKS cluster can create or change other resources in the cluster. This can only be achieved if the service is using a so-called service account, which has a role assigned with the needed permissions. Let's do this:
+1. Before we can use Helm, we need to prepare our cluster for it. Helm is basically only a client tool (already installed in the cloud shell) that relies on a service called `tiller`, which must be installed in the cluster. That service then performs the actual deployment of Kubernetes objects. Yet AKS clusters are by default installed with Role Based Access Control ([RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)), which enables restricting permissions for certain operations to specific roles. By default, none of the services running in an AKS cluster can create or change other resources in the cluster. This can only be achieved if the service is using a so-called service account, which has a role assigned with the needed permissions. Let's prepare this service account and give it a cluster-admin role:
 
     ```sh
     kubectl -n kube-system create serviceaccount tiller
     kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+    ```
+
+    The actual installation of tiller is then very easy, Helm can do it for us, the only thing we need to make sure is that we tell it to use the service account we created for it:
+
+    ```sh
     helm init --service-account=tiller
     ```
-1. Now, to be able to redeploy our app with Helm, we need to delete our current objects:
+1. Another preparation step is cleaning up again. To be able to redeploy our app with Helm, we first need to delete our current objects:
 
     ```sh
     kubectl delete pod myapp
@@ -505,7 +510,7 @@ This is when [Helm](https://docs.helm.sh/helm/) charts come into play. The main 
 
 ## Summary and Outlook
 
-We saw how to work with Docker, AKS and ACR to create a multi-container app with an approach that would work in mostly the same way for much larger microservice based apps as well.
+We saw how to work with Docker, docker-compose, AKS, ACR and Helm to create a multi-container app with an approach that would work in mostly the same way for much larger microservice based apps as well.
 
 For a real application, the next step would be to add state. There are two major options for this:
 
