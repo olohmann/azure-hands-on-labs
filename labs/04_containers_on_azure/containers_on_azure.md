@@ -255,7 +255,7 @@ The easiest way to deploy a container to a PaaS service in Azure is to use ACI, 
     az container create --resource-group <resource group> --name myapp --image <registry name>.azurecr.io/myappimage:v1.0 --cpu 1 --memory 1 --registry-login-server <registry name>.azurecr.io --registry-username <registry user> --registry-password <registry password> --dns-name-label <some unique name> --ports 80 
     ```
 
-    Where `<some unique name>` is the prefix for the public DNS name under which your container will be available.
+    For the Java deployment, use `--ports 8080` instead of `--port 80` as the Tomcat server is listening per default on port 8080. In addition, `<some unique name>` is the prefix for the public DNS name under which your container will be available.
 
 1. Track the progress of your deployment with:
 
