@@ -493,8 +493,8 @@ This is when [Helm](https://docs.helm.sh/helm/) charts come into play. The main 
 1. Another preparation step is cleaning up again. To be able to redeploy our app with Helm, we first need to delete our current objects:
 
     ```sh
-    kubectl delete pod myapp
-    kubectl delete pod myapi
+    kubectl delete deployment myapp
+    kubectl delete deployment myapi
     kubectl delete svc myapp
     kubectl delete svc myapi
     ```
