@@ -506,7 +506,7 @@ This is when [Helm](https://docs.helm.sh/helm/) charts come into play. The main 
 1. Explore the files in this directory:
 
     * `Chart.yaml` contains some meta information like name and version of the chart.
-    * `templates/myapp.yaml` contains deployment and service for our app, but with a few parameters in Go template notation in curly braces, like `{{.Values.registry}}` for the registry from which the image should be pulled.
+    * `templates/myapp.yaml` contains deployment and service for our app, but with a few parameters in Go template notation in curly braces, like `.Values.registry` for the registry from which the image should be pulled.
     * `templates/myapi.yaml` contains deployment and service for the api, again with parameters.
     * `values.yaml` contains the default values for the parameters.
 
