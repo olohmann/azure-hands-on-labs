@@ -11,6 +11,7 @@ layout: home
 1. [Introduction to Terraform on Azure](./labs/03_terraform/terraform.md)
 1. [Introduction to Containers on Azure](./labs/04_containers_on_azure/containers_on_azure.md)
 1. [Introduction to Container Orchestration and AKS](./labs/05_container_orchestration_and_aks/containers_and_aks.md)
+1. [Introduction to CI/CD with Azure DevOps](./labs/06_cicd_azure_devops/cicd_azure_devops.md)
 
 ## Acknowledgements
 
