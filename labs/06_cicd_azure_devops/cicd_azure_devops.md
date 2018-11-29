@@ -144,3 +144,88 @@ To build something in a Build Pipeline, first we need some code. Luckily, we do 
 
 The `myapp.war` application package we just built is the result of and concludes our CI Build Pipeline creation experience. This output artifact can now be used in the next part of our pipelines, the Release Pipeline, which is the topic of the next exercise.
 
+## Exercise 6: Create the Azure DevOps Release Pipeline
+
+The output of the CI part of CI/CD (like the .war file we just built) should always be independent of the actual environment we are deploying to: It should not contain any environment specifics like connection strings or even passwords, instead it should only have the default values for local development. Yet to actually deploy to the different environments (in this case, one dev and one prod environment) of course we need to make the environments known to the system and define the steps of how we can actually deploy the generic package to the specific environment.
+
+1. In your project, navigate to **Pipelines**, **Releases**. This should open an empty list of Release Pipelines.
+
+1. Click **New pipeline**. This will open a **Select a template** drawer to the right.
+
+1. Choose **Azure App Service Deployment** and click **Apply**.
+
+1. Name the stage "Dev", then close this drawer with the "x":
+
+    ![Stage Name](./media/stagename.png)
+
+1. In the pipeline overview, under **Artifacts**, click **Add an artifact**.
+
+1. Select our Build Pipeline, for the **Default version** choose **Latest from the build pipeline default branch with tags** and click **Add**.
+
+1. In the pipeline overview, under **Stages**, in the **Dev** environment, click the task link:
+
+    ![Task Link](./media/onejobonetask.png)
+
+    This opens the actual steps for automating the deployment to this stage/environment. Here we will now fill in the details of how we can connect to our Azure resources.
+
+1. Under **Parameters**, **Azure Subscription**, choose your subscription:
+
+    ![Choose Azure Subscription](./media/chooseAzureSubscription.png)
+
+1. Click **Authorize**. Azure DevOps then tries to automatically create a so-called [Service Principle](https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals) that our automation can use to authenticate against the Azure API, so that we can create resources and deploy apps. There are two prerequisites for this:
+    1. The currently logged on user must have permission to create a service principal.
+    1. The currently logged on user must have permission to assign the Contributor role for the whole Azure subscription.
+
+    More often than not, at least one of those prerequisites is not met. In your case the operation may fail as well, because typically you will be missing the permission to create role assignments for the whole subscription. 
+
+1. (If the **Authorize** step failed) Click the **Manage** link for the **Azure subscription** and then click **New service connection**. This will open a dialog in which you can more selectively scope the Service Principal to only one of the resource groups you have **Owner** permissions to:
+
+    ![Azure Resource Manager service connection dialog](./media/armconnectiondialog.png)
+
+    If this fails as well, you would need to ask an administrator to create a Service Principal for you with at least **Contributor** permissions for the resource group and enter the information for that Service Principal manually in the dialog.
+
+1. Repeat the previous step for the other resource group, but this time call the connection `Prod`.
+
+1. Return to the new Release Pipeline you still have open in your other tab and choose the `Dev` connection for the **Azure Subscription** parameter. You might have to click the refresh button besides the drop-down box.
+
+1. For **App Service Name** click the dropdown and you should see the app service we created in the beginning of this lab - select it:
+
+    ![Select Web App](./media/selectwebapp.png)
+
+1. Click the `+` button above the task list:
+
+    ![Add Task](./media/addtask.png)
+
+    This opens a drawer to the right containing many available tasks, ranging from simple oerations like copying files to complex integrations like creating VMs in VMWare or deploying to third party services like the Apple or Google App Stores. Even an AWS integration is available. You might want to try searching for your favorite service using the search box in the **Add tasks** drawer.
+
+1. In the **Add tasks** drawer search box, type "bash", select the **Bash** task and click **Add**.
+
+    As we are creating a Java application that is running in Tomcat, the easiest option to run our app as the root app is to rename its `.war` file to `ROOT.war`. We will do so with another step that will always be executed immediately before the deploy task that was already created by the template.
+
+1. Drag the **Bash** task above the **Deploy Azure App Service** task.
+
+1. In the **Bash** task, check the **Inline** radio button and enter the following command:
+
+    ```shell
+    mv _simplegreet/drop/myapp.war _simplegreet/drop/ROOT.war
+    ```
+
+1. In the **Deploy Azure App Service** task, for **Package or folder** enter `_simplegreet/drop/ROOT.war`.
+
+1. Rename the pipeline to "Greetings":
+
+    ![Rename Pipeline](./media/renamepipeline.png)
+
+1. If the pipeline has all steps in correct order now, click **Save**:
+
+    ![Save Tasks](./media/savetasks.png)
+
+1. In the **Save** dialog, enter a comment if you like and click **OK**.
+
+1. Next to the **Save** button, click **+Release**, **+Create new release**.
+
+1. In the drawer coming up, click **Create**.
+
+    In contrast to Build Pipelines, in Release pipelines we are not directly queueing the tasks to be performed immediately, instead we create a release, which keeps the exact versions of all artifacts in one place, so that this exact package can be deployed to the different stages at any time. By default, the single stage we have defined so far will be deployed automatically, but we can choose to not have any deployments be triggered automatically.
+    
+    Azure DevOps now shows you a page on which you can track the progress of the automated deployment. It should succeed. 
