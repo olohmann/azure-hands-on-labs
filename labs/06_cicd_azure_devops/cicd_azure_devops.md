@@ -122,9 +122,8 @@ To build something in a Build Pipeline, first we need some code. Luckily, we do 
 
 1. Return to the root folder of the repository and inspect the file `azure-pipelines.yml`. This file defines that we should run in the `Default` agent queue (to which we added our private agent in the previous exercise) and a few steps to perform the actual product build. These are mainly two calls to the Maven toolset.
 
-    The first step is needed because for contractual reasons the JDBC driver for SQL Server is not available on the puplic Maven repository. Instead, we install it locally here from a version we have available in our repository.
-
-    The second steps calls Maven to do the actual build of the `pom.xml`.
+    * The first step is needed because for contractual reasons the JDBC driver for SQL Server is not available on the puplic Maven repository. Instead, we install it locally here from a version we have available in our repository.
+    * The second steps calls Maven to do the actual build of the `pom.xml`.
 
 1. To actually run the build, in the menu,  click **Pipelines**:
 
@@ -228,4 +227,20 @@ The output of the CI part of CI/CD (like the .war file we just built) should alw
 
     In contrast to Build Pipelines, in Release pipelines we are not directly queueing the tasks to be performed immediately, instead we create a release, which keeps the exact versions of all artifacts in one place, so that this exact package can be deployed to the different stages at any time. By default, the single stage we have defined so far will be deployed automatically, but we can choose to not have any deployments be triggered automatically.
     
-    Azure DevOps now shows you a page on which you can track the progress of the automated deployment. It should succeed. 
+    Azure DevOps now shows you a page on which you can track the progress of the automated deployment. It should succeed.
+
+    In the next step, let's verify our deployments so far using the Azure Portal.
+
+1. Navigate to `https://portal.azure.com`, in the menu on the left, choose **Resource Groups** and select your `dev` resource group.
+
+1. In the resource group you should see an app service plan, an app service and Azure SQL Server resources. Click on the app service and then click the **Browse** button. This will take you to the web site you just deployed at `https://<some name>.azurewebsites.net`. It will take a while for the app to come up at initial start, but eventually you should see an app inviting you to create a few greetings (almost the same app as the one we used in our previous lab).
+
+1. Back in the portal, go to the **Application Settings** part of your app service, scroll down to **Application Settings**, and click **Show Values**. This will show you the environment specific values for this stage:
+
+    ![Application Settings](./media/applicationsettings.png)
+
+    These settings make sure that the web app code is using the correct JDBC driver with the correct connection string and a few more settings. These settings are passed to the application as environment variables, and fortunately Spring Boot allows [overriding its application settings](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) via these environment variables (for .NET applications [the same approach applies](https://docs.microsoft.com/en-us/azure/app-service/web-sites-configure#app-settings)).
+
+    The values itself come directly from the ARM template we deployed right in the beginning.
+    
+    It is highly recommended to always follow this approach, as it makes configuring different environments in the same way very easy, which we we will see in the next exercise.
