@@ -52,7 +52,7 @@ In the past, keeping up the similarity of environments often was a matter of hum
 
 A good approach to solving this problem is called [Infrastructure as Code (IaC)](https://docs.microsoft.com/en-us/azure/devops/learn/what-is-infrastructure-as-code). In that approach, changes to an environment are always performed through scripts and templates that are version controlled and require no human interaction other than passing in some parameters. Implementing IaC is much easier for cloud environments than for traditional environments because **everything** (including all networking) in the cloud is *software-defined*, meaning that everything can be configured through an API. For Azure, that API is called Azure Resource Manager (ARM) and with [ARM templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates) we can easily create our two environments in exactly the same way.
 
-Well... "easily" in this case refers to the fact that our templates are already predefined for the exact needs of our application. Creating such templates can of course become complex. If you are interested in how these templates like this (and other IaC technologies) work: This will be the topic of an upcoming lab. For now, we will simply be using the template.
+Well... "easily" in this case refers to the fact that our templates are already predefined for the exact needs of our application. Creating such templates can of course become complex. If you are interested in how these templates (and other IaC technologies) work: This will be the topic of an upcoming lab. For now, we will simply be using the template.
 
 1. In the cloud shell, type:
     ```sh
@@ -66,6 +66,7 @@ Well... "easily" in this case refers to the fact that our templates are already 
     This opens a text editor above the shell.
 1. In the editor, navigate to the file `simplegreet/template/webapp-sql.json` and have a brief look at its json structure. This is the Azure Resource Manager (ARM) template that we are going to use to set up our environments.
 
+
 1. In the cloud shell, execute this command:
     ```sh
     az group deployment create -g <resource group name> --template-file simplegreet/template/webapp-sql.json --parameters '{"name":{"value":"<a unique name>"}}' --no-wait
@@ -73,6 +74,7 @@ Well... "easily" in this case refers to the fact that our templates are already 
     Where...
     * `<resource group name>` is the name of your **Dev** resource group.
     * `<a unique name>` is a name in lower case letters that you can freely choose, but that must still be available as `<a unique name>.azurewebsites.net`. The name should contain 'dev' as well to indicate that this is the development version of the website we will deploy later. You might want to check the availability of the name by typing `nslookup <a unique name>.azurewebsites.net` in any shell and check whether that returns an IP already.
+
 1. Repeat the preceding step with the **Prod** resource group and another unique name. We are not waiting for these operations now, they will run in the background. Eventually, once the operations succeed, we can check your new website in a browser at `https://<a unique name>.azurewebsites.net` - it will not contain our application yet but should show a generic app service page.
 
 ## Exercise 3: Set up Azure DevOps
@@ -85,7 +87,7 @@ Well... "easily" in this case refers to the fact that our templates are already 
 
 1. When asked, click **Continue**. This will create a so called `organization` with the name of your account (e.g. `labuser`). The organization is the root object for your work in Azure DevOps and contains projects.
 
-1. You will arrive at a screen that asks you to ***Create a project to get started**. At that screen, enter "simplegreet" as the project name, leave everything else as default, then click **Create project**. Now we have everything ready to start a full development project for free, including backlogs, kanban boards, code repositories, building and deploying software and much more. What is not included in the *free* version of Azure DevOps is the compute power that is needed for performing the resource-intensive tasks of actually building and deploying software. Thus, to enable our CI/CD pipeline, we need to add one piece: A build agent. We will do that in the next exercise.
+1. You will arrive at a screen that asks you to **Create a project to get started**. At that screen, enter "simplegreet" as the project name, leave everything else as default, then click **Create project**. Now we have everything ready to start a full development project for free, including backlogs, kanban boards, code repositories, building and deploying software and much more.
 
 ## Exercise 4: Create a build and release agent
 
@@ -407,5 +409,9 @@ By now, we should a good basic understanding of what Azure Pipelines can achieve
     There are many techniques for doing idempotent database updates like schema migrations or SSDT with dacpac deployments for SQL Server.
 
 * **Containers**. Building and deploying containerized applications can be much easier than working directly with web servers or databases in the CI/CD pipeline, because in general they are much more standardized from an operations perspective. Azure Pipelines has a number of predefined templates and features that make it particularly easy to build and deploy containerized applications.
+
+* **Security**. The current environment has room for improvement regarding security. A Web Application Firewall (WAF) could be added in front of the app service and the SQL Server could use a more secure authentication mechanism than username/password based authentication with SQL logins, to name just two items that just cannot be implemented in a short lab like this.
+
+* **Authentication and Encryption**. Typically we would use a custom domain for a real website, for which we would need a certificate safely stored in Azure Key Vault and we would use Azure Active Directory or an other identity provider to provide authentication for our code.
 
 * **Much more...**
