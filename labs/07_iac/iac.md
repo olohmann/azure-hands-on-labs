@@ -10,13 +10,15 @@ A good approach to solving this problem is called [Infrastructure as Code (IaC)]
 
 here simple. Start points for more complex in [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) ([github version](https://github.com/Azure/azure-quickstart-templates))
 
+Introduce Idempotency as the gold standard for repeatability and maintainability
+
 ### Objectives
 
 In this hands-on lab, you will learn how to:
 
+- Automate Azure by using the Azure Command Line Interface 2.0 ([Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest)) on Windows or Linux
 - Generate a basic [ARM template](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates) from an existing Azure deployment
-- Deploy ARM templates with parameters using [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
-)
+- Deploy ARM templates with parameters using [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest)
 - Use ARM [Template Functions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions) to create dynamic, repeatable templates and reduce the number of needed parameters
 - Initialize Terraform with the [Azure Provider](https://www.terraform.io/docs/providers/azurerm/) and create a simple Azure deployment
 - Use Terraform [variables](https://www.terraform.io/docs/configuration/variables.html) to parameterize an Azure deployment
@@ -54,13 +56,26 @@ Estimated time to complete this lab: **120-180** minutes.
 
 ---
 
-## Exercise 2: Create something simple using the Azure CLI
+## Exercise 2: Create resources with the Azure CLI
 
-We will start by creating something simple in Azure manually. What **exactly** we are creating does not matter at this point. We just need something to create a template from, which we can use subsequently to create copies of our simple resources.
+We will start by creating something simple in Azure from the the command line, using the cross-platform [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest). The Azure CLI can be universally used to provision and configure Azure resources where we have a Linux or Windows shell available.
+
+One possible approach to enabling IaC for Azure thus is simply creating scripts in PowerShell or bash that contain Azure CLI commands that create the desired resources one by one. [Azure PowerShell modules](https://docs.microsoft.com/en-us/powershell/azure/overview?view=azps-1.1.0) are available as well to create such script based provisioning of resources.
+
+We will not explore a purely script based approach in this lab though, because shell scripts are always **imperative**. To be able to reach our goal of **idempotency** (see section *Overview* above), an imperative script will always need to actively make sure it will work with the current state of our environment. For example, it will need to check whether a resource exists, before trying to create it, to make sure the script will not fail when we apply it a second time. This checking of current state to enable idempotency requires a lot of conditionals and "overhead" code that obfuscates our original intents and is hard to maintain. Thus, we prefer **declarative** approaches over imperative ones. In declarative approaches we simply declare our desired state and some engine then checks the actual state and determines the actions needed to reach the desired state. This represents a much easier and concise approach to IaC, as well requiring less maintenance once the initial configuration has been established.
+
+Both ARM Templates and Terraform are such declarative approaches and will be explored later on.
+
+For now we will simply use the Azure CLI to create **something** as a start point. What **exactly** we are creating does not matter at this point. We just need something to create a template from, which we can use subsequently to create copies of our simple resources.
 
 The simple "environment" we create will simply consist of two [storage accounts](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-overview).
 
 1. In the cloud shell, type:
     ```sh
-    az storage account create -n <account name> -g <resource group>  
+    az storage account create -n <account name 1> -g <resource group>  
+    az storage account create -n <account name 2> -g <resource group>  
     ```
+
+    ...where `<resource group>` is the name of the resource group you were provided with by your instructor and `<account name 1>` and `<account name 2>` are two names you can freely choose but that must be still available globally. The client will tell you whether they are free, choose another name otherwise.
+
+1. 
