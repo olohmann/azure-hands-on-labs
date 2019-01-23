@@ -2,11 +2,26 @@
 
 ## Overview
 
-We will have one development environment and one "production" environment, so that we will be able to safely test any change in an isolated environment that is as structurally similar to production as possible. This similarity is key to not experiencing production releases that fail badly because some detail in production was different from what we tested against.
+One of the most common pitfalls in bringing applications to production is when our production environment is configured slightly different than the environments we tested in. Thus, we always want to be able to safely test any change to our application in an isolated environment that is as structurally similar to production as possible. This similarity is key to not experiencing production releases that fail badly because some detail in production was different from what we tested against.
 
 In the past, keeping up the similarity of environments often was a matter of human discipline: Admins carefully documented all configuration steps they applied to any environment, so they could apply them to the other environment in the same way. Yet just like all processes that rely on human discipline, this approach is susceptible to human error - forgetting just one little detail can break the whole thing.
 
-A good approach to solving this problem is called [Infrastructure as Code (IaC)](https://docs.microsoft.com/en-us/azure/devops/learn/what-is-infrastructure-as-code). In that approach, changes to an environment are always performed through scripts and templates that are version controlled and require no human interaction other than passing in some parameters. Implementing IaC is much easier for cloud environments than for traditional environments because **everything** (including all networking) in the cloud is *software-defined*, meaning that everything can be configured through an API. For Azure, that API is called Azure Resource Manager (ARM) and with [ARM templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates) we can easily create our two environments in exactly the same way.
+![ProdConfigBad](./media/prodconfigbad.png)
+
+A good approach to solving this problem is called [Infrastructure as Code (IaC)](https://docs.microsoft.com/en-us/azure/devops/learn/what-is-infrastructure-as-code). In that approach, changes to an environment are always performed through scripts and templates that are version controlled and require no human interaction other than passing in some parameters. This approach makes sure 
+
+![IaC Pipeline](./media/iac-pipeline.png)
+
+Implementing IaC is much easier for cloud environments than for traditional environments because **everything** (including all networking) in the cloud is *software-defined*, meaning that everything can be configured through an API.
+
+For Azure, the main configuration API is called Azure Resource Manager (ARM), available at https://management.azure.com/. In theory, we could provision all our Azure resources by working with that REST API directly, yet that is neither conventient nor efficient in most cases.
+
+Instead, the two most useful and popular techniques for implementing IaC with Azure, are
+
+* [ARM templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates) and
+* [Terraform](https://www.terraform.io/)
+
+Both of which we will explore in this lab.
 
 here simple. Start points for more complex in [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) ([github version](https://github.com/Azure/azure-quickstart-templates))
 
@@ -78,4 +93,3 @@ The simple "environment" we create will simply consist of two [storage accounts]
 
     ...where `<resource group>` is the name of the resource group you were provided with by your instructor and `<account name 1>` and `<account name 2>` are two names you can freely choose but that must be still available globally. The client will tell you whether they are free, choose another name otherwise.
 
-1. 
