@@ -66,10 +66,7 @@ Estimated time to complete this lab: **120-180** minutes.
 
    ![Ready Azure Cloud Shell](./media/portalconsoleready.png)
 
----
-**Tip:** *You can open another instance of cloud shell by starting a new browser tab or window and navigating to [https://shell.azure.com](https://shell.azure.com). This way you have more space and you can easily switch between the portal and the cloud shell.*
-
----
+>**Tip:** *You can open another instance of cloud shell by starting a new browser tab or window and navigating to [https://shell.azure.com](https://shell.azure.com). This way you have more space and you can easily switch between the portal and the cloud shell.*
 
 ## Exercise 2: Create resources with the Azure CLI
 
@@ -98,10 +95,7 @@ The simple "environment" we create will simply consist of of a [storage account]
     ```
     ...where `<resource group>` is the name of the resource group you were provided with by your instructor and `<account name>` is a name you can freely choose but that must be still available globally. The client will tell you whether that is the case, choose another name otherwise.
 
----
-**Tip:** *You can copy/paste the commands from this lab into the cloud shell, but you might have to use the context menu of the browser (right click into the shell and choose "paste".*
-
----
+>**Tip:** *You can copy/paste the commands from this lab into the cloud shell, but you might have to use the context menu of the browser (right click into the shell and choose "paste").*
 
 ## Exercise 3: Generate an ARM template from existing resource group
 
@@ -157,8 +151,11 @@ Now we will deploy the template to the same resource group, but with another nam
 1. Deploy the template again, but now in the **complete** mode:
 
     ```sh
-    az group deployment create --template-file simpletemplate.json --parameters storageAccounts_<some name>_name=newcadullstor -g <resource group> --mode complete
+    az group deployment create --template-file simpletemplate.json --parameters storageAccounts_<some name>_name=<some other name> -g <resource group> --mode complete
     ```
+
+    > **ATTENTION!** Make sure to use the correct resource group name here, as you might destroy important resources, e.g. the storage account for your cloud shell!
+
 1. List the storage accounts again:
 
     ```sh
@@ -166,17 +163,78 @@ Now we will deploy the template to the same resource group, but with another nam
     ```
     This time you will only see the storage account we created with our template, our original one was deleted.
 
----
-**Note:** *While "complete" sounds harmless, it is actually the more dangerous of the two modes, as it can delete resources inadvertently.*
-
----
+>**Note:** *While "complete" sounds harmless, it is actually the more dangerous of the two modes, as it can delete resources inadvertently.*
 
 ## Exercise 5: Use ARM template functions
 
-We can use functions for a lot of purposes. In this case we will make our template more dynamic and reusable by replacing the hard coded location and making the storage name unique automatically. This kind of editing can ideally be done by using Visual Studio Code with the ARM extension installed.
+We can use functions for a lot of purposes. In this case we will make our template more dynamic and reusable by replacing the hard coded location and making the storage name unique automatically.
 
-TODO: Look at template from lab 6 again
 
-TODO: Functions
+> **Tip:** *This kind of editing can ideally be done by using [Visual Studio Code](https://code.visualstudio.com/) with the [Azure Resource Manager extension](https://marketplace.visualstudio.com/items?itemName=msazurermtools.azurerm-vscode-tools) installed. This extension allows for syntax highlighting and automatic error checking for ARM templates. If you have Visual Studio Code installed locally, just download the template file using the up-/download button of the cloud shell. You can then edit the file using Visual Studio Code and upload it again.*
+![Up-/Download Button of Cloud Shell](./media/updownload.png)
 
-TODO: Mention VS Code
+First, we will take care of the location. To change that from the current hard coed value and make it dynamic, we will use the [resourceGroup()](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions-resource#resourcegroup) function. This function returns a JSON object containing information about the current resource group, including its location.  
+
+1. In the template file, locate the line where the location is being set. That line should look something like this:
+
+    ```json
+    "location": "westeurope",
+    ```
+
+1. Change the location value like this:
+
+    ```json
+    "location": "[resourceGroup().location]",
+    ```
+
+    As mentioned before, the brackets "`[]`" indicate that a function is being called, in this case just getting the location information of the current resource group.
+
+1. Now we will use the [uniqueString()](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions-string#uniquestring) function to make our storage account name more unique. To make that name reusable, this time we will not directly replace the field in the storage account resource, instead we will use our first variable. Variables make it easier to use values that occur more than once in the template, e.g. when one resource reference another one. Locate the variables section in the template:
+    ```json
+       "variables": {},
+    ```
+1. Change the section like this:
+
+    ```json
+    "variables": {
+        "uniqueStorageName":"[concat('storage', uniqueString(subscription().subscriptionId))]"
+    },
+    ```
+
+    This defines a new variable named `uniqueStorageName` that we will use later on. We are actually using another function here as well: The [concat()](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions-array#concat) function that can combine strings.
+
+    > The uniqueness of the name create above is not guaranteed beyond our subscription. So for any endpoint that must be globally unique (like `myappname` in `myappname.azurewebsites.net`) it might still happen that the string returned by `uniqueString()` is already taken, depending on the value that was passed to it. Yet using the subscription Id makes this highly unlikely.
+
+1. For any real world templates, the concat function is often used to generate useful names from parameters, so that not every name must be explicitly specified on deploying. We will use this approach here as well. First, let's give our parameter a nicer name. Change the `parameters` section like this:
+
+    ```json
+    "parameters": {
+        "name": {
+        "type": "String"
+        }
+    },
+    ```
+    This reduces the needed input to just one string representing the name for the whole thing. For example, we could call the whole thing "`myapp-dev`" and derive the names as variables from this, like "`myapp-dev-web`" for a website. Or in our case a unique storage name like "`myapp-dev-<some unique string>`" in the next step.
+
+1. Change the `variables` section (again) like this:
+
+    ```json
+    "variables": {
+        "uniqueStorageName":"[concat(parameters('name'), uniqueString(subscription().subscriptionId))]"
+    },
+    ```
+    This way, we do not simple call our storage account "`storage<some unique string>`" like before, but instead have the `name` parameter in front, so that we can have something meaningful in the storage account name.
+
+1. Finally, we still need to use our new variable in the actual resource. Locate the line `"name": "[parameters('StorageAccounts_<some name>_name')]",` and change it to:
+
+    ```json
+    "name": "[variables('uniqueStorageName')]",
+    ```
+1. Now the template is ready and we can deploy it agin by executing the following command in the cloud shell:
+
+    ```sh
+    az group deployment create --template-file simpletemplate.json --parameters name=<some name> -g <resource group>
+    ```
+    You should now have a new storage account with a nice unique name.
+
+> When we create a template from an existing deployment, it often contains a lot of clutter like values set to their defaults that we do not really care about and distract the reader from the real intentions of our configuration. Thus, typically, [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) provide for better start points. For our example of setting up a storage account, a cleaner example is available in the [Azure Quickstart Templates on github](https://github.com/Azure/azure-quickstart-templates/blob/master/101-storage-account-create/azuredeploy.json).
