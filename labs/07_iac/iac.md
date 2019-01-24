@@ -235,9 +235,39 @@ First, we will take care of the location. To change that from the current hard c
     ```sh
     az group deployment create --template-file simpletemplate.json --parameters name=<some name> -g <resource group>
     ```
-    You should now have a new storage account with a nice unique name.
+    You should now have a new storage account with a nice unique name. You might want to explore that as well by using the [Azure Portal](https://portal.azure.com) (make sure you are logged in with the correct account) and navigating to your resource group.
 
-> When we create a template from an existing deployment, it often contains a lot of clutter like values set to their defaults that we do not really care about and distract the reader from the real intentions of our configuration. Thus, typically, [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) provide for better start points. For our example of setting up a storage account, a cleaner example is available in the [Azure Quickstart Templates on github](https://github.com/Azure/azure-quickstart-templates/blob/master/101-storage-account-create/azuredeploy.json).
+    > When we create a template from an existing deployment, it often contains a lot of clutter like values set to their defaults that we do not really care about and distract the reader from the real intentions of our configuration. Thus, typically, [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) provide for better start points. For our example of setting up a storage account, a cleaner example is available in the [Azure Quickstart Templates on github](https://github.com/Azure/azure-quickstart-templates/blob/master/101-storage-account-create/azuredeploy.json).
+
+## Exercise 6: Multiple Resources
+
+The deployment we did so far was super simple on purpose. In the real world, a storage account alone is not too useful.
+
+Thusm in this exercise we will be revisiting the sample ARM template from our previous lab [Introduction to CI/CD with Azure DevOps](../06_cicd_azure_devops/cicd_azure_devops.md) to see an example that is closer to what is needed in the real world.
+
+1. First we need to get the sample from the last lab again. This can be simply achieved using [git](https://git-scm.com/), which is preinstalled in the cloud shell. In the cloud shell, execute:
+
+    ```sh
+    git clone https://github.com/cadullms/simplegreet 
+    ```
+1. In the cloud shell editor, navigate to `simplegreet/template/webapp-sql.json`. This template contains a SQL Server and a web app. A few interesting aspects about this template:
+    * The template defines a few dependencies (Use `Ctrl+F` to search for the term "`dependsOn`") that make sure that resources are created in the correct sequence (e.g. a web site of type "`Microsoft.Web/sites`" cannot be created before its server of type "`Microsoft.Web/serverfarms`" is created).
+    * The template already configures settings like the connection string to the SQL Server for the web app (use `Ctrl+F` to search for "`SPRING_DATASOURCE_URL`"), making the environment specific setup much easier (and adhering to the [third factor of the 12-factor-app method](https://12factor.net/config)).
+
+1. You might want to try deploying this template like the ones before, but be aware that we might hit quota limits in our subscription, depending on the number of lab attendees.
+
+## Extra Challenge:
+
+Try to create an Azure DevOps pipeline as described in our previous lab [Introduction to CI/CD with Azure DevOps](../06_cicd_azure_devops/cicd_azure_devops.md), but only deploying our storage account to three environments (this time all in the same resource group): "Dev", "QA" and "Prod". Some hints:
+
+* You do not need a Build Pipeline then.
+* You can directly upload the template.json we created in the previous exercises to an Azure DevOps repo.
+* You need to add the service principal that was provided to you in the credential sheet as an Azure Service Connection as described in the lab.
+* Create a Release Pipeline:
+    * Choose empty pipeline template.
+    * Use the repo containing our ARM template as Artifact.
+    * Use the "Create or Update Azure Resource Group" deployment task to deploy our template.
+    * Overwrite the "`name`" parameter in the "Create or Update Azure Resource Group" task with a different name per stage.
 
 ## ARM Template limitations
 
