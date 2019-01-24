@@ -46,6 +46,7 @@ Typically these should be preconfigured for you (if in doubt, ask your instructo
 * An active Azure subscription or at least two resource groups (one for "dev", one for "prod") to which you have owner permissions.
 * A modern web browser (Edge, Chrome or Firefox preferred, Internet Explorer 11 to some degree) with internet access.
 * **Optional**: [Visual Studio Code](https://code.visualstudio.com/) with the [Azure Resource Manager extension](https://marketplace.visualstudio.com/items?itemName=msazurermtools.azurerm-vscode-tools) and Terraform extensions (from the [community](https://marketplace.visualstudio.com/items?itemName=mauve.terraform) and or [Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azureterraform#overview)) installed.
+
 ---
 
 Estimated time to complete this lab: **120-180** minutes.
@@ -106,7 +107,9 @@ We will now use Azure CLI to generate our first ARM template (we could do it in 
     ```sh
     az group export -g <resource group> > simpletemplate.json
     ```
-    ... where `<resource group>` is the name of your resource group. This will create a template, which we will now view in the built-in editor of the cloud shell. There might be error messages about resources that cannot be exported - these can be safely be ignored for now. 
+    ... where `<resource group>` is the name of your resource group. This will create a template, which we will now view in the built-in editor of the cloud shell.
+    
+    > There will be error messages about resources that cannot be exported - these can be safely be ignored for now. 
 
 1. In the toolbar of the shell click **Open editor**:
 
@@ -133,9 +136,9 @@ Now we will deploy the template to the same resource group, but with another nam
 1. Execute:
 
     ```sh
-    az group deployment create --template-file simpletemplate.json --parameters storageAccounts_<some name>_name=newcadullstor -g <resource group>
+    az group deployment create --template-file simpletemplate.json --parameters storageAccounts_<some name>_name=<another name> -g <resource group>
     ```
-    ...but replace `storageAccounts_<some name>_name` with the parameter name from your template and `<resource group>` with the name of your resource group.
+    ...but replace `storageAccounts_<some name>_name` with the parameter name from your template, `<another name>` with another name than the one you used for your first storage account and `<resource group>` with the name of your resource group.
 
     This creates a new storage account in our resource group.
 
@@ -146,12 +149,12 @@ Now we will deploy the template to the same resource group, but with another nam
     ```
     The `--query "[].name"` argument represents a [JMESPath expression](http://jmespath.org/) and tells az to only output the names instead of the full json description of the storage accounts. JMESPath can be used in many other ways to customize the output of az.
 
-    The result of the above command will be the names of **two** storage accounts. The reason for this is that by default an ARM deployment is done in the **incremental** [deployment mode](https://docs.microsoft.com/en-us/azure/azure-resource-manager/deployment-modes), which means that any resource that is already there in the resource group but is not mentioned in the template will be left unchanged.
+    The result of the above command should be the names of **two** storage accounts. The reason for this is that by default an ARM deployment is done in the **incremental** [deployment mode](https://docs.microsoft.com/en-us/azure/azure-resource-manager/deployment-modes), which means that any resource that is already there in the resource group but is not mentioned in the template will be left unchanged.
 
-1. Deploy the template again, but now in the **complete** mode:
+1. Deploy the template again, but now in the **complete** mode and **yet another name** than the ones you used before:
 
     ```sh
-    az group deployment create --template-file simpletemplate.json --parameters storageAccounts_<some name>_name=<some other name> -g <resource group> --mode complete
+    az group deployment create --template-file simpletemplate.json --parameters storageAccounts_<some name>_name=<yet another name> -g <resource group> --mode complete
     ```
 
     > **ATTENTION!** Make sure to use the correct resource group name here, as you might destroy important resources, e.g. the storage account for your cloud shell!
@@ -161,7 +164,7 @@ Now we will deploy the template to the same resource group, but with another nam
     ```sh
     az storage account list -g <resource group> --query "[].name"
     ```
-    This time you will only see the storage account we created with our template, our original one was deleted.
+    This time you will only see the storage account we created last with our template, the others were deleted.
 
 >**Note:** *While "complete" sounds harmless, it is actually the more dangerous of the two modes, as it can delete resources inadvertently.*
 
@@ -170,7 +173,7 @@ Now we will deploy the template to the same resource group, but with another nam
 We can use functions for a lot of purposes. In this case we will make our template more dynamic and reusable by replacing the hard coded location and making the storage name unique automatically.
 
 
-> **Tip:** *This kind of editing can ideally be done by using [Visual Studio Code](https://code.visualstudio.com/) with the [Azure Resource Manager extension](https://marketplace.visualstudio.com/items?itemName=msazurermtools.azurerm-vscode-tools) installed. This extension allows for syntax highlighting and automatic error checking for ARM templates. If you have Visual Studio Code installed locally, just download the template file using the up-/download button of the cloud shell. You can then edit the file using Visual Studio Code and upload it again.*
+> **Tip:** *This kind of editing can ideally be done by using [Visual Studio Code](https://code.visualstudio.com/) with the [Azure Resource Manager extension](https://marketplace.visualstudio.com/items?itemName=msazurermtools.azurerm-vscode-tools) installed. This extension allows for syntax highlighting and automatic error checking for ARM templates. If you have Visual Studio Code installed locally, just download the template file using the up-/download button of the cloud shell. Use the name `simpletemplate.json` for the download. You can then edit the file using Visual Studio Code and upload it again.*
 ![Up-/Download Button of Cloud Shell](./media/updownload.png)
 
 First, we will take care of the location. To change that from the current hard coed value and make it dynamic, we will use the [resourceGroup()](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions-resource#resourcegroup) function. This function returns a JSON object containing information about the current resource group, including its location.  
@@ -235,9 +238,41 @@ First, we will take care of the location. To change that from the current hard c
     ```sh
     az group deployment create --template-file simpletemplate.json --parameters name=<some name> -g <resource group>
     ```
-    You should now have a new storage account with a nice unique name.
+    > **Important**: A storage account name can have 24 characters at max. The hash value that `uniqueString()`returns is already 13 characters long, leaving only 11 for the name you choose here. If you use more than 11 characters, the deployment will fail.
 
-> When we create a template from an existing deployment, it often contains a lot of clutter like values set to their defaults that we do not really care about and distract the reader from the real intentions of our configuration. Thus, typically, [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) provide for better start points. For our example of setting up a storage account, a cleaner example is available in the [Azure Quickstart Templates on github](https://github.com/Azure/azure-quickstart-templates/blob/master/101-storage-account-create/azuredeploy.json).
+    You should now have a new storage account with a nice unique name. You might want to explore that as well by using the [Azure Portal](https://portal.azure.com) (make sure you are logged in with the correct account) and navigating to your resource group.
+
+    > **Tip:** When we create a template from an existing deployment, it often contains a lot of clutter like values set to their defaults that we do not really care about and distract the reader from the real intentions of our configuration. Thus, typically, [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) provide for better start points. For our example of setting up a storage account, a cleaner example is available in the [Azure Quickstart Templates on github](https://github.com/Azure/azure-quickstart-templates/blob/master/101-storage-account-create/azuredeploy.json).
+
+## Exercise 6: Multiple Resources
+
+The deployment we did so far was super simple on purpose. In the real world, a storage account alone is not too useful.
+
+Thusm in this exercise we will be revisiting the sample ARM template from our previous lab [Introduction to CI/CD with Azure DevOps](../06_cicd_azure_devops/cicd_azure_devops.md) to see an example that is closer to what is needed in the real world.
+
+1. First we need to get the sample from the last lab again. This can be simply achieved using [git](https://git-scm.com/), which is preinstalled in the cloud shell. In the cloud shell, execute:
+
+    ```sh
+    git clone https://github.com/cadullms/simplegreet 
+    ```
+1. In the cloud shell editor, navigate to `simplegreet/template/webapp-sql.json`. This template contains a SQL Server and a web app. A few interesting aspects about this template:
+    * The template defines a few dependencies (Use `Ctrl+F` to search for the term "`dependsOn`") that make sure that resources are created in the correct sequence (e.g. a web site of type "`Microsoft.Web/sites`" cannot be created before its server of type "`Microsoft.Web/serverfarms`" is created).
+    * The template already configures settings like the connection string to the SQL Server for the web app (use `Ctrl+F` to search for "`SPRING_DATASOURCE_URL`"), making the environment specific setup much easier (and adhering to the [third factor of the 12-factor-app method](https://12factor.net/config)).
+
+1. You might want to try deploying this template like the ones before, but be aware that we might hit quota limits in our subscription, depending on the number of lab attendees.
+
+## Extra Challenge:
+
+Try to create an Azure DevOps pipeline as described in our previous lab [Introduction to CI/CD with Azure DevOps](../06_cicd_azure_devops/cicd_azure_devops.md), but only deploying our storage account to three environments (this time all in the same resource group): "Dev", "QA" and "Prod". Some hints:
+
+* You do not need a Build Pipeline then.
+* You can directly upload the template.json we created in the previous exercises to an Azure DevOps repo.
+* You need to add the service principal that was provided to you in the credential sheet as an Azure Service Connection as described in the lab.
+* Create a Release Pipeline:
+    * Choose empty pipeline template.
+    * Use the repo containing our ARM template as Artifact.
+    * Use the "Create or Update Azure Resource Group" deployment task to deploy our template.
+    * Overwrite the "`name`" parameter in the "Create or Update Azure Resource Group" task with a different name per stage.
 
 ## ARM Template limitations
 
