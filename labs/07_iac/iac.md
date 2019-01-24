@@ -190,7 +190,7 @@ First, we will take care of the location. To change that from the current hard c
     "location": "[resourceGroup().location]",
     ```
 
-    As mentioned before, the brackets "`[]`" indicate that a function is being called, in this case just getting the location information of the current resource group.
+    As mentioned before, the brackets `[]` indicate that a function is being called, in this case just getting the location information of the current resource group.
 
 1. Now we will use the [uniqueString()](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions-string#uniquestring) function to make our storage account name more unique. To make that name reusable, this time we will not directly replace the field in the storage account resource, instead we will use our first variable. Variables make it easier to use values that occur more than once in the template, e.g. when one resource reference another one. Locate the variables section in the template:
     ```json
@@ -217,7 +217,7 @@ First, we will take care of the location. To change that from the current hard c
         }
     },
     ```
-    This reduces the needed input to just one string representing the name for the whole thing. For example, we could call the whole thing "`myapp-dev`" and derive the names as variables from this, like "`myapp-dev-web`" for a website. Or in our case a unique storage name like "`myapp-dev-<some unique string>`" in the next step.
+    This reduces the needed input to just one string representing the name for the whole thing. For example, we could call the whole thing `myapp-dev` and derive the names as variables from this, like `myapp-dev-web` for a website. Or in our case a unique storage name like `myapp-dev-<some unique string>` in the next step.
 
 1. Change the `variables` section (again) like this:
 
@@ -226,7 +226,7 @@ First, we will take care of the location. To change that from the current hard c
         "uniqueStorageName":"[concat(parameters('name'), uniqueString(subscription().subscriptionId))]"
     },
     ```
-    This way, we do not simple call our storage account "`storage<some unique string>`" like before, but instead have the `name` parameter in front, so that we can have something meaningful in the storage account name.
+    This way, we do not simply call our storage account `storage<some unique string>` like before, but instead have the `name` parameter in front, so that we can have something meaningful in the storage account name.
 
 1. Finally, we still need to use our new variable in the actual resource. Locate the line `"name": "[parameters('StorageAccounts_<some name>_name')]",` and change it to:
 
@@ -256,8 +256,8 @@ Thusm in this exercise we will be revisiting the sample ARM template from our pr
     git clone https://github.com/cadullms/simplegreet 
     ```
 1. In the cloud shell editor, navigate to `simplegreet/template/webapp-sql.json`. This template contains a SQL Server and a web app. A few interesting aspects about this template:
-    * The template defines a few dependencies (Use `Ctrl+F` to search for the term "`dependsOn`") that make sure that resources are created in the correct sequence (e.g. a web site of type "`Microsoft.Web/sites`" cannot be created before its server of type "`Microsoft.Web/serverfarms`" is created).
-    * The template already configures settings like the connection string to the SQL Server for the web app (use `Ctrl+F` to search for "`SPRING_DATASOURCE_URL`"), making the environment specific setup much easier (and adhering to the [third factor of the 12-factor-app method](https://12factor.net/config)).
+    * The template defines a few dependencies (Use `Ctrl+F` to search for the term `dependsOn`) that make sure that resources are created in the correct sequence (e.g. a web site of type `Microsoft.Web/sites` cannot be created before its server of type `Microsoft.Web/serverfarms` is created).
+    * The template already configures settings like the connection string to the SQL Server for the web app (use `Ctrl+F` to search for `SPRING_DATASOURCE_URL`), making the environment specific setup much easier (and adhering to the [third factor of the 12-factor-app method](https://12factor.net/config)).
 
 1. You might want to try deploying this template like the ones before, but be aware that we might hit quota limits in our subscription, depending on the number of lab attendees.
 
@@ -272,7 +272,7 @@ Try to create an Azure DevOps pipeline as described in our previous lab [Introdu
     * Choose empty pipeline template.
     * Use the repo containing our ARM template as Artifact.
     * Use the "Create or Update Azure Resource Group" deployment task to deploy our template.
-    * Overwrite the "`name`" parameter in the "Create or Update Azure Resource Group" task with a different name per stage.
+    * Overwrite the `name` parameter in the "Create or Update Azure Resource Group" task with a different name per stage.
 
 ## ARM Template limitations
 
