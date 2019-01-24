@@ -238,3 +238,13 @@ First, we will take care of the location. To change that from the current hard c
     You should now have a new storage account with a nice unique name.
 
 > When we create a template from an existing deployment, it often contains a lot of clutter like values set to their defaults that we do not really care about and distract the reader from the real intentions of our configuration. Thus, typically, [Azure Quickstart Templates](https://azure.microsoft.com/en-us/resources/templates/) provide for better start points. For our example of setting up a storage account, a cleaner example is available in the [Azure Quickstart Templates on github](https://github.com/Azure/azure-quickstart-templates/blob/master/101-storage-account-create/azuredeploy.json).
+
+## ARM Template limitations
+
+ARM templates do have limitations when deployments become more complex. To mention just two:
+* It is not easy to combine ARM templates in different files. The ARM syntax structure with parameters, variables and resources is fixed and other templates can only be integrated through [Template Nesting](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-linked-templates) which cannot just take a file in the same directory, instead we always ned to pass URLs, which makes it quite complex.
+* ARM templates have no easy way of adding extra configuration that is outside of the ARM capabilities like adding a short script to set IP limitations.
+
+All of this can easily be achieved by using Terraform.
+
+**Please click [this link](terraform.md) to continue with the Terraform lab!**
