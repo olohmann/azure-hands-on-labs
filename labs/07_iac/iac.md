@@ -229,6 +229,9 @@ First, we will take care of the location. To change that from the current hard c
     ```json
     "name": "[variables('uniqueStorageName')]",
     ```
+
+    > In case this does not work, the full template is available [here](./simpletemplate.json). 
+
 1. Now the template is ready and we can deploy it agin by executing the following command in the cloud shell:
 
     ```sh
