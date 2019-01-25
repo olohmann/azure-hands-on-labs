@@ -8,6 +8,13 @@ Let us start with a quick definition from Wikipedia:
 
 Building up the infrastructure with Terraform can happen in many environments. One of them is Azure. In this lab you are going to explore the Terraform provider for Azure.
 
+## Objectives
+
+- Understand the Terraform Loop
+- Initialize Terraform with the [Azure Provider](https://www.terraform.io/docs/providers/azurerm/)
+- Create simple Azure Terraform deployments
+- Explore a more complex example
+
 ## Preparation
 
 This lab assumes that you have a resource group assigned to you. If not, please create a resource group before you start with the exercise.
@@ -171,3 +178,9 @@ terraform destroy
 ```
 
 As previously, seeing is believing. Use the Azure Portal to look at the actual resource group. Your storage account is gone.
+
+### (Optional) Task 5: More complex example
+
+To see a more complex example, you might want to clone [this repository from github](https://github.com/cadullms/tf-samples) and explore the [explanation](https://github.com/cadullms/tf-samples/README.md) and try applying the [vm-cloud-init](https://github.com/cadullms/tf-samples/tree/master/vm-cloud-init) sample that creates an arbitrary number of Linux VMs at once.
+
+> If you try to apply this, please use only one VM at max! You will as well have to take the `resource "azurerm_resource_group" "myterraformgroup"` out of `main.tf` and instead reference your resource group!

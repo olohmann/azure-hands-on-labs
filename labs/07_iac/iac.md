@@ -35,10 +35,6 @@ In this hands-on lab, you will learn how to:
 - Generate a basic [ARM template](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates) from an existing Azure deployment
 - Deploy ARM templates with parameters using [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest)
 - Use ARM [Template Functions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions) to create dynamic, repeatable templates and reduce the number of needed parameters
-- Initialize Terraform with the [Azure Provider](https://www.terraform.io/docs/providers/azurerm/) and create a simple Azure deployment
-- Use Terraform [variables](https://www.terraform.io/docs/configuration/variables.html) to parameterize an Azure deployment
-- Use Terraform [modules](https://www.terraform.io/docs/modules/index.html) to reuse configuration parts
-- Use Terraform [remote state](https://www.terraform.io/docs/state/remote.html) to enable team collaboration
 
 ### Prerequisites
 
