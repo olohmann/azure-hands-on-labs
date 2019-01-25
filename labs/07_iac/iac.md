@@ -202,14 +202,14 @@ First, we will take care of the location. To change that from the current hard c
 
     This defines a new variable named `uniqueStorageName` that we will use later on. We are actually using another function here as well: The [concat()](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-functions-array#concat) function that can combine strings.
 
-    > The uniqueness of the name create above is not guaranteed beyond our subscription. So for any endpoint that must be globally unique (like `myappname` in `myappname.azurewebsites.net`) it might still happen that the string returned by `uniqueString()` is already taken, depending on the value that was passed to it. Yet using the subscription Id makes this highly unlikely.
+    > The uniqueness of the name created above is not guaranteed beyond our subscription. So for any endpoint that must be globally unique (like `myappname` in `myappname.azurewebsites.net`) it might still happen that the string returned by `uniqueString()` is already taken, depending on the value that was passed to it. Yet using the subscription Id makes this highly unlikely.
 
 1. For any real world templates, the concat function is often used to generate useful names from parameters, so that not every name must be explicitly specified on deploying. We will use this approach here as well. First, let's give our parameter a nicer name. Change the `parameters` section like this:
 
     ```json
     "parameters": {
         "name": {
-        "type": "String"
+            "type": "String"
         }
     },
     ```
