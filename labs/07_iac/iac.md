@@ -265,10 +265,11 @@ Thusm in this exercise we will be revisiting the sample ARM template from our pr
 
 Try to create an Azure DevOps pipeline as described in our previous lab [Introduction to CI/CD with Azure DevOps](../06_cicd_azure_devops/cicd_azure_devops.md), but only deploying our storage account to three environments (this time all in the same resource group): "Dev", "QA" and "Prod". Some hints:
 
-* You do not need a Build Pipeline then.
+* You can create an Azure DevOps project for free as described [here](../06_cicd_azure_devops/cicd_azure_devops.md#exercise3) (but choose another name than "greetings" for the team project). 
+* You do not need a Build Pipeline.
 * You can directly upload the template.json we created in the previous exercises to an Azure DevOps repo.
-* You need to add the service principal that was provided to you in the credential sheet as an Azure Service Connection as described in the lab.
-* Create a Release Pipeline:
+* You need to add the service principal that was provided to you in the credential sheet as an Azure Service Connection as described [here](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=vsts#create-an-azure-resource-manager-service-connection-with-an-existing-service-principal).
+* Create a [Release Pipeline](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/what-is-release-management?view=vsts):
     * Choose empty pipeline template.
     * Use the repo containing our ARM template as Artifact.
     * Use the "Create or Update Azure Resource Group" deployment task to deploy our template.

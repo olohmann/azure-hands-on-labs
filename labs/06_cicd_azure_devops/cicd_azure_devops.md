@@ -77,7 +77,7 @@ Well... "easily" in this case refers to the fact that our templates are already 
 
 1. Repeat the preceding step with the **Prod** resource group and another unique name. We are not waiting for these operations now, they will run in the background. Eventually, once the operations succeed, we can check your new website in a browser at `https://<a unique name>.azurewebsites.net` - it will not contain our application yet but should show a generic app service page.
 
-## Exercise 3: Set up Azure DevOps
+## <a name="exercise3"></a> Exercise 3: Set up Azure DevOps
 
 1. In an additional Incognito/InPrivate browser tab, navigate to `https://dev.azure.com/`. You should be seeing something like:
 
