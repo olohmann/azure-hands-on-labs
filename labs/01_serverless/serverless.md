@@ -6,6 +6,9 @@ Functions have been the basic building blocks of software since the first lines 
 
 In this lab, you will create an Azure Function that monitors a blob container in Azure Storage for new images, and then performs automated analysis of the images using the Microsoft Cognitive Services [Computer Vision API](https://www.microsoft.com/cognitive-services/en-us/computer-vision-api). Specifically, The Azure Function will analyze each image that is uploaded to the container for adult or racy content and create a copy of the image in another container. Images that contain adult or racy content will be copied to one container, and images that do not contain adult or racy content will be copied to another. In addition, the scores returned by the Computer Vision API will be stored in blob metadata.
 
+The following illustration provides an overview:
+![Overview](./media/overview.png)
+
 ### Objectives
 
 In this hands-on lab, you will learn how to:
@@ -55,35 +58,49 @@ In this exercise, you will create an App Service Plan and an Azure Function App 
 
 1. Provide App Service Plan configuration details.
     - Make sure you select the existing resource group in (2).
-    - Make sure you change the Pricing Tier in (5) as described in the next step.
+    - Make sure you select Windows in (3). This should be the default.
+    - Make sure you select the location matching the resource group's location in (4). This should be the default.
+    - Make sure the Pricing Tier shows 'S1 Standard'. This should be the default.
     ![Details](./media/new-app-service-plan-3.png)
 
-1. Change the Pricing Tier to S1.
-    ![Details](./media/new-app-service-plan-4.png)
+1. Click 'Create' (6).
 
-1. After the pricing tier has been updated, confirm the creation.
-    ![Details](./media/new-app-service-plan-5.png)
-
-1. The deployment should finish a couple of minutes later.
+1. The deployment starts...
     ![Details](./media/new-app-service-plan-6.png)
+
+1. ... and should finish a couple of minutes later. Selecting 'Go to resource'...
     ![Details](./media/new-app-service-plan-7.png)
+
+1. ... should bring you to the overview:
     ![Details](./media/new-app-service-plan-8.png)
 
 ### Task 2: Create a Function App
 
-1. Now we are going to create a **Function App** that references the created App Service Plan. Click **+ Create a resource**, followed by **Compute** and **Function App** or search for it.
+1. Now we are going to create a **Function App** that references the created App Service Plan. Click **+ Create a resource** and search for **Function App**.
     ![Creating an Azure Function App](./media/new-functions-app-1.png)
 
-1. Enter an app name that is unique within Azure. Under **Resource Group**, select **Use Existing** and choose "labuserXX_serverless_rg" (XX = your lab user number) as the resource-group name to create a resource group for the Function App.
+1. Select 'Function App' from the results
+    ![Creating an Azure Function App](./media/new-functions-app-1-1.png)
 
-    If you are using your own subscription, feel free to setup your own resource group. Choose the **Location** nearest you (e.g. Southcentral US or West Europe), and accept the default values for all other parameters. Then click **Create** to create a new Function App.
-
-    Make sure to select your App Service Plan in the Hosting Plan configuration.
-
-    > If you are in a shared subscription lab environment do **not** use the Consumption Plan. Instead choose the previously created app service plan.
-    > The app name becomes part of a DNS name and therefore must be unique within Azure. Make sure a green check mark appears to the name indicating it is unique. You probably **won't** be able to use "functionslab" as the app name.
-
+1. Take this screenshot of the function app creation dialog as a reference for the following steps:
     ![Creating a Function App](./media/new-functions-app-2.png)
+
+1. In **App name** (1) enter an app name that is unique within Azure (e.g. `labuser01fn`. In **Resource Group** (2), select **Use Existing** and choose your assigned resource group, for example `RG001`, as the resource group name to create a resource group for the Function App.
+
+    > The app name becomes part of a DNS name and therefore must be unique within Azure. Make sure a green check mark appears to the name indicating it is unique. You probably **won't** be able to use "myfunction" as the app name.
+
+1. Choose `Windows` as OS type (3).
+
+1. Change hosting plan to `App Service Plan` (4). It should automatically select the previously created app service plan (5).
+
+1. Runtime Stack should be .NET (6). This is the default.
+
+1. Select "Create new" for storage (7). It will generate a new unique name automatically. Keep it, there is no need for a manual name creation.
+
+1. Enable application insights (8). This will open a sub dialog. Make sure to **Enable** (1) the application insights collection and link it to the function under creation (2) and use the same location (3):
+    ![Creating a Function App](./media/new-functions-app-4.png)
+
+1. Back in the Function App creation dialog hit 'Create' (9). Proceed with the next task.
 
 ### Task 3: Uploading the test data
 
@@ -91,7 +108,10 @@ In this exercise, you will create an App Service Plan and an Azure Function App 
 
     ![Opening the resource group](./media/new-functions-app-3.png)
 
-1. Periodically click the **Refresh** button at the top of the blade until "Deploying" changes to "Succeeded," indicating that the Function App has been deployed. Then click the storage account that was created for the Function App. The name of the storage account has random parts to it - specifically for your deployment. So expect it to be different than shown at the screenshot.
+1. Periodically click the **Refresh** button at the top of the blade until "Deploying" changes to "Succeeded," indicating that the Function App has been deployed. It should look similar to this screenshot:
+    ![Opening the resource group](./media/new-functions-app-5.png)
+
+1. Then click the storage account that was created for the Function App. The name of the storage account has random parts to it - specifically for your deployment. So expect it to be different than shown at the screenshot.
 
     ![Opening the storage account](./media/open-storage-account.png)
 
@@ -99,11 +119,11 @@ In this exercise, you will create an App Service Plan and an Azure Function App 
 
     ![Opening blob storage](./media/open-blob-storage.png)
 
-1. Click **+ Container**. Type "uploaded" into the **Name** box and set **Public access level** to **Private**. Then click the **OK** button to create a new container.
+1. Click **+ Container**. Type `uploaded` into the **Name** box and set **Public access level** to **Private**. Then click the **OK** button to create a new container.
 
      ![Adding a container](./media/add-container.png)
 
-1. Repeat Step 4 to add containers named "accepted" and "rejected" to blob storage.
+1. Repeat Step 4 to add containers named `accepted` and `rejected` to blob storage.
 
 1. Confirm that all three containers were added to blob storage.
 
@@ -115,21 +135,52 @@ The Azure Function App has been created and you have added three containers to t
 
 Once you have created an Azure Function App, you can add Azure Functions to it. In this exercise, you will add a function to the Function App you created in the first exercise and write C# code that uses the [Computer Vision API](https://www.microsoft.com/cognitive-services/en-us/computer-vision-api) to analyze images added to the "uploaded" container for adult or racy content.
 
-1. Return to the blade for the "labuserXX_serverless_rg" resource group and click the Azure Function App that you created in the first exercise. 
+1. Return to the overview of your resource group and click the Azure Function App that you created in the first exercise.
 
     ![Opening the Function App](./media/open-function-app.png)
 
-1. Click the **+** sign to the right of **Functions**. Set the language to **CSharp**, and then click **Custom function**.
+1. Click the **+** sign to the right of **Functions**.
 
     ![Adding a function](./media/add-function.png)
 
-1. Set **Language** to **C#**. Then click **BlobTrigger - C#**.
+1. Select 'In-portal' in the template selection.
+
+    ![Adding a function](./media/add-function-2.png)
+
+1. Click 'Continue'.
+
+    ![Adding a function](./media/add-function-3.png)
+
+1. In the function creation sub-dialog select 'More templates...':
   
-    ![Selecting a function template](./media/cs-select-template.png)
+    ![Selecting a function template](./media/add-function-4.png)
 
-1. Enter "BlobImageAnalysis" (without quotation marks) for the function name and "uploaded/{name}" into the **Path** box. (The latter applies the blob storage trigger to the "uploaded" container that you created in Exercise 1.) Then click the **Create** button to create the Azure Function.
+1. Press 'Finish and view templates' after the selection:
 
-    ![Creating an Azure Function](./media/create-azure-function.png)
+    ![Selecting a function template](./media/add-function-5.png)
+
+1. In the template explorer, search for 'blob' (1) and select the 'Azure Blob Storage trigger':
+
+    ![Selecting a function template](./media/add-function-6.png)
+
+1. As Azure Functions keeps the footprint very small of each function, integration options such as listening for Azure Blob Storage triggers are not installed by default. Instead, they are installed via an extension system. As this is the first function in this *Function App* that wants to use the trigger, you have to install the extension first:
+
+    ![Install a function extension](./media/add-function-7.png)
+
+1. You have to wait until the installation has completed:
+
+    ![Install a function extension](./media/add-function-8.png)
+
+1. Now press continue:
+    ![Install a function extension](./media/add-function-9.png)
+
+1. Finally, create the new function. As function name you, choose `ClassifyImage` (1). As path choose `uploaded/{name}` (2) (this corresponds to the container in the storage account we have created before). And hit 'Create' (3).
+
+    ![Create function](./media/add-function-10.png)
+
+1. The created function should look like this:
+
+    ![Create function](./media/add-function-11.png)
 
 1. Replace the code shown in the code editor with the following statements:
 
@@ -142,6 +193,9 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
     public async static Task Run(Stream myBlob, string name, TraceWriter log)
     {
         log.Info($"Analyzing uploaded image {name} for adult content...");
+        log.Info($"SubscriptionKey: {ConfigurationManager.AppSettings["SubscriptionKey"]}");
+        log.Info($"VisionEndpoint: {ConfigurationManager.AppSettings["VisionEndpoint"]}");
+        log.Info($"AzureWebJobsStorage: {ConfigurationManager.AppSettings["AzureWebJobsStorage"]}");
 
         var array = await ToByteArrayAsync(myBlob);
         var result = await AnalyzeImageAsync(array, log);
@@ -242,79 +296,86 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
     }
     ```
 
-    ```Run``` is the method called each time the function is executed. The ```Run``` method uses a helper method named ```AnalyzeImageAsync``` to pass each blob added to the "uploaded" container to the Computer Vision API for analysis. Then it calls a helper method named ```StoreBlobWithMetadata``` to create a copy of the blob in either the "accepted" container or the "rejected" container, depending on the scores returned by ```AnalyzeImageAsync```.
+    ```Run``` is the method called each time the function is executed. The ```Run``` method uses a helper method named ```AnalyzeImageAsync``` to pass each blob added to the `uploaded` container to the Computer Vision API for analysis. Then it calls a helper method named ```StoreBlobWithMetadata``` to create a copy of the blob in either the `accepted` container or the `rejected` container, depending on the scores returned by ```AnalyzeImageAsync```.
 
-1. Click the **Save** button at the top of the code editor to save your changes. Then click **View files**.
-
-    ![Saving the function](./media/cs-save-run-csx.png)
-
-1. Click **+ Add** to add a new file, and name the file **project.json**.
-
-    ![Adding a project file](./media/cs-add-project-file.png)
-
-1. Add the following statements to **project.json**:
-
-    ```json
-    {
-        "frameworks": {
-            "net46": {
-                "dependencies": {
-                    "WindowsAzure.Storage": "7.2.0"
-                }
-            }
-        }
-    }
-    ```
-
-1. Click the **Save** button to save your changes. Then click **run.csx** to go back to that file in the code editor.
+1. Click the **Save** button (1) at the top of the code editor to save your changes. Then click **Run** (2) button to execute the code shown in the editor. Open the log panel (3) and look at the error output (4). A message like *"[...] The specified container does not exist."* is **expected** at this moment!
 
     ![Saving the project file](./media/cs-save-project-file.png)
 
-    _Saving the project file_
+### Summary
 
-An Azure Function written in C# has been created, complete with a JSON project file containing information regarding project dependencies. The next step is to add an application setting that the Azure Function relies on.
+An Azure Function written in C# has been created, listening for changes in the associated storage account's `uploaded` folder. Still missing is the configuration of the Computer Vision Service for the actual image classification task.
 
-## Exercise 3: Add a subscription key to application settings
+## Exercise 3: Add a subscription key for the Computer Vision Service
 
 The Azure Function you created in Exercise 2 loads a subscription key for the Microsoft Cognitive Services Computer Vision API from application settings. This key is required in order for your code to call the Computer Vision API, and is transmitted in an HTTP header in each call. It also loads the base URL for the Computer Vision API (which varies by data center) from application settings. In this exercise, you will subscribe to the Computer Vision API, and then add an access key and a base URL to application settings.
 
-1. In the Azure Portal, click **+ Create a resource**, followed by **AI + Cognitive Services** and **Computer Vision API**.
+1. We are going to use the Azure CLI to create a new Computer Vision Service endpoint. We are using the CLI to provide additional arguments which cannot be specified in the UI. In the Azure Portal, click on the Azure Shell symbol, to start the Azure Shell:
 
-    ![Creating a new Computer Vision API subscription](./media/new-vision-api.png)
+    ![Azure Shell](./media/new-vision-api.png)
 
-1. Enter "VisionAPI" into the **Name** box and select **S1** as the **Pricing tier**. Under **Resource Group**, select **Use existing** and select the "labuserXX_serverless_rg" resource group that you created for the Function App in Exercise 1. Check the **I confirm** box, and then click **Create**.
+1. Paste the following command in the shell and replace the `--resource-group` and `--name` parameter values. If your location is different than `WestEurope`, also update it:
 
-    ![Subcribing to the Computer Vision API](./media/create-vision-api.png)
+    ```sh
+    az cognitiveservices account create --resource-group MY-RESOURCE-GROUP --name MY-SERVICE-NAME --sku S1 --kind ComputerVision --location WestEurope --yes
+    ```
 
-1. Return to the blade for "labuserXX_serverless_rg" and click the Computer Vision API subscription that you just created.
+1. On success the result looks like this:
+
+    ```sh
+    [...]
+    {
+    "endpoint": "https://westeurope.api.cognitive.microsoft.com/",
+    "etag": "\"00000a0c-0000-0000-0000-5c608d0c0000\"",
+    "id": "/subscriptions/397015c1-c8bb-4d61-9527-2101ff4a6cfc/resourceGroups/RG001/providers/Microsoft.CognitiveServices/accounts/labuser01-cv",
+    "internalId": "c20e032001ae48e7a5630e92841a01cd",
+    "kind": "ComputerVision",
+    "location": "WestEurope",
+    "name": "labuser01-cv",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "RG001",
+    "sku": {
+        "name": "S1",
+        "tier": null
+    },
+    "tags": null,
+    "type": "Microsoft.CognitiveServices/accounts"
+    }
+    ```
+
+1. Return to your resource group overview and click the Computer Vision API subscription that you just created.
 
     ![Opening the Computer Vision API subscription](./media/open-vision-api.png)
 
-1. Copy the URL under **Endpoint** into your favorite text editor so you can easily retrieve it in a moment. Then click **Show access keys**.
+1. Copy the URL under **Endpoint** into your favorite text editor so you can easily retrieve it in a moment (e.g. use notepad to cache it). Then click **Show access keys**.
 
     ![Viewing the access keys](./media/show-access-keys.png)
 
-1. Click the **Copy** button to the right of **KEY 1** to copy the access key to the clipboard.
+1. Click the **Copy** button to the right of **KEY 1** to copy the access key to the clipboard. Put the access key also in a text editor to cache it.
 
     ![Copying the access key](./media/copy-access-key.png)
 
-1. Return to the Function App in the Azure Portal and click the app name in the ribbon on the left. Then click **Application settings**.
+1. Return to the Function App that we created a while ago. Click on the Function App Name (1) in the ribbon on the left. Then click **Application settings** (2).
 
     ![Viewing application settings](./media/open-app-settings.png)
 
-1. Scroll down to the "Application settings" section. Add a new app setting named "SubscriptionKey" (without quotation marks), and paste the subscription key that is on the clipboard into the **Value** box. Then add a setting named "VisionEndpoint" and set its value to the endpoint URL you saved in Step 4. Finish up by clicking **Save** at the top of the blade.
+1. Scroll down to the "Application settings" section.
 
     ![Adding application settings](./media/add-keys.png)
 
-1. The app settings are now configured for your Azure Function. It's a good idea to validate those settings by running the function and ensuring that it compiles without errors. Click **BlobImageAnalysis**. Then click **Run** to compile and run the function. Confirm that no compilation errors appear in the output log, and **ignore** any exceptions that are reported on binding to the storage item. This is expected not to work as the event's parameter is not provided to our function when we click "Run".
+1. Add a new app setting named `SubscriptionKey`, and paste the subscription key from the Vision Service into the **Value** box. Then add a setting named `VisionEndpoint` and set its value to the endpoint URL you saved previously. 
 
-    ![Compiling the function](./media/cs-run-function.png)
+    ![Adding application settings](./media/add-keys-2.png)
 
-The work of writing and configuring the Azure Function is complete. Now comes the fun part: testing it out.
+1. Finish up by clicking **Save** at the top of the blade.
+
+    ![Adding application settings](./media/add-keys-3.png)
+
+1. The app settings are now configured for your Azure Function. The work of writing and configuring the Azure Function is complete. Now comes the fun part: testing it out.
 
 ## Exercise 4: Test the Azure Function
 
-Your function is configured to listen for changes to the blob container named "uploaded" that you created in Exercise 1. Each time an image appears in the container, the function executes and passes the image to the Computer Vision API for analysis. To test the function, you simply upload images to the container. In this exercise, you will use the Azure Portal to upload images to the "uploaded" container and verify that copies of the images are placed in the "accepted" and "rejected" containers.
+Your function is configured to listen for changes to the blob container named `uploaded` that you created in Exercise 1. Each time an image appears in the container, the function executes and passes the image to the Computer Vision API for analysis. To test the function, you simply upload images to the container. In this exercise, you will use the Azure Portal to upload images to the `uploaded` container and verify that copies of the images are placed in the `accepted` and `rejected` containers.
 
 1. In the Azure Portal, go to the resource group created for your Function App. Then click the storage account that was created for it.
 
