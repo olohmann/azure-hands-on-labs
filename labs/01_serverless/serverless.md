@@ -354,7 +354,7 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
     dotnet build extensions.csproj -o bin --no-incremental --packages D:\home\.nuget
     ```
 
-    The following output is roughly expected:
+    You should see a "Build succeeded" message:
     ![dotnet console](./media/dotnet-output.png)
 
 1. Click the **Save** button (1) at the top of the code editor to save your changes. Then click **Run** (2) button to execute the code shown in the editor. Open the log panel (3) and look at the error output (4). A message like *"[...] The specified container does not exist."* is **expected** at this moment!
