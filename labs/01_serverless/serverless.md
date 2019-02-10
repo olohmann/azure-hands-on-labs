@@ -185,60 +185,60 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
 1. Replace the code shown in the code editor with the following statements:
 
     ```C#
+    #r "Microsoft.WindowsAzure.Storage"
     using Microsoft.WindowsAzure.Storage.Blob;
     using Microsoft.WindowsAzure.Storage;
     using System.Net.Http.Headers;
-    using System.Configuration;
 
-    public async static Task Run(Stream myBlob, string name, TraceWriter log)
+    public async static Task Run(Stream myBlob, string name, ILogger log)
     {
-        log.Info($"Analyzing uploaded image {name} for adult content...");
-        log.Info($"SubscriptionKey: {ConfigurationManager.AppSettings["SubscriptionKey"]}");
-        log.Info($"VisionEndpoint: {ConfigurationManager.AppSettings["VisionEndpoint"]}");
-        log.Info($"AzureWebJobsStorage: {ConfigurationManager.AppSettings["AzureWebJobsStorage"]}");
+        log.LogInformation($"Analyzing uploaded image {name} for adult content...");
+        log.LogInformation($"SubscriptionKey: {System.Environment.GetEnvironmentVariable("SubscriptionKey")}");
+        log.LogInformation($"VisionEndpoint: {System.Environment.GetEnvironmentVariable("VisionEndpoint")}");
+        log.LogInformation($"AzureWebJobsStorage: {System.Environment.GetEnvironmentVariable("AzureWebJobsStorage")}");
 
         var array = await ToByteArrayAsync(myBlob);
         var result = await AnalyzeImageAsync(array, log);
 
-        log.Info("Is Adult: " + result.adult.isAdultContent.ToString());
-        log.Info("Adult Score: " + result.adult.adultScore.ToString());
-        log.Info("Is Racy: " + result.adult.isRacyContent.ToString());
-        log.Info("Racy Score: " + result.adult.racyScore.ToString());
+        log.LogInformation("Is Adult: " + result.adult.isAdultContent.ToString());
+        log.LogInformation("Adult Score: " + result.adult.adultScore.ToString());
+        log.LogInformation("Is Racy: " + result.adult.isRacyContent.ToString());
+        log.LogInformation("Racy Score: " + result.adult.racyScore.ToString());
 
         if (result.adult.isAdultContent || result.adult.isRacyContent)
         {
             // Copy blob to the "rejected" container
-            StoreBlobWithMetadata(myBlob, "rejected", name, result, log);
+            await StoreBlobWithMetadata(myBlob, "rejected", name, result, log);
         }
         else
         {
             // Copy blob to the "accepted" container
-            StoreBlobWithMetadata(myBlob, "accepted", name, result, log);
+            await StoreBlobWithMetadata(myBlob, "accepted", name, result, log);
         }
     }
 
-    private async static Task<ImageAnalysisInfo> AnalyzeImageAsync(byte[] bytes, TraceWriter log)
+    private async static Task<ImageAnalysisInfo> AnalyzeImageAsync(byte[] bytes, ILogger log)
     {
         HttpClient client = new HttpClient();
 
-        var key = ConfigurationManager.AppSettings["SubscriptionKey"];
+        var key = System.Environment.GetEnvironmentVariable("SubscriptionKey");
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
 
         HttpContent payload = new ByteArrayContent(bytes);
         payload.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/octet-stream");
 
-        var endpoint = ConfigurationManager.AppSettings["VisionEndpoint"];
-        var results = await client.PostAsync(endpoint + "/analyze?visualFeatures=Adult", payload);
+        var endpoint = System.Environment.GetEnvironmentVariable("VisionEndpoint");
+        var results = await client.PostAsync(endpoint + "vision/v2.0/analyze?visualFeatures=Adult", payload);
         var result = await results.Content.ReadAsAsync<ImageAnalysisInfo>();
         return result;
     }
 
     // Writes a blob to a specified container and stores metadata with it
-    private static void StoreBlobWithMetadata(Stream image, string containerName, string blobName, ImageAnalysisInfo info, TraceWriter log)
+    private async static Task StoreBlobWithMetadata(Stream image, string containerName, string blobName, ImageAnalysisInfo info, ILogger log)
     {
-        log.Info($"Writing blob and metadata to {containerName} container...");
+        log.LogInformation($"Writing blob and metadata to {containerName} container...");
 
-        var connection = ConfigurationManager.AppSettings["AzureWebJobsStorage"].ToString();
+        var connection = System.Environment.GetEnvironmentVariable("AzureWebJobsStorage").ToString();
         var account = CloudStorageAccount.Parse(connection);
         var client = account.CreateCloudBlobClient();
         var container = client.GetContainerReference(containerName);
@@ -250,10 +250,10 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
             if (blob != null)
             {
                 // Upload the blob
-                blob.UploadFromStream(image);
+                await blob.UploadFromStreamAsync(image);
 
                 // Get the blob attributes
-                blob.FetchAttributes();
+                await blob.FetchAttributesAsync();
 
                 // Write the blob metadata
                 blob.Metadata["isAdultContent"] = info.adult.isAdultContent.ToString();
@@ -262,12 +262,13 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
                 blob.Metadata["racyScore"] = info.adult.racyScore.ToString("P0").Replace(" ","");
 
                 // Save the blob metadata
-                blob.SetMetadata();
+                await blob.SetMetadataAsync();
             }
         }
         catch (Exception ex)
         {
-            log.Info(ex.Message);
+            log.LogInformation(ex.Message);
+            throw;
         }
     }
 
@@ -297,6 +298,64 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
     ```
 
     ```Run``` is the method called each time the function is executed. The ```Run``` method uses a helper method named ```AnalyzeImageAsync``` to pass each blob added to the `uploaded` container to the Computer Vision API for analysis. Then it calls a helper method named ```StoreBlobWithMetadata``` to create a copy of the blob in either the `accepted` container or the `rejected` container, depending on the scores returned by ```AnalyzeImageAsync```.
+
+1. As our function code has a reference to an external package (Azure Storage), we need to install the assembly references. To do so, we need to modify a file called `extensions.csproj` residing in the actual function configuration. Open the Console view of the ClassifyImage function:
+
+    ![function console](./media/function-console.png)
+
+1. Type the following commands (Note: you cannot yet copy and paste into the console view):
+
+    ```sh
+    cd ..
+    cat extensions.csproj
+    ```
+
+    The following **output** is expected:
+
+    ```sh
+    <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <WarningsAsErrors />
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.0" />
+        <PackageReference Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="1.0.*" />
+    </ItemGroup>
+    </Project>
+    ```
+
+    Continue typing:
+
+    ```sh
+    curl -o extensions.csproj -L https://aka.ms/cs-extensions
+    cat extensions.csproj
+    ```
+
+    The following **output** is expected:
+
+    ```sh
+    <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <WarningsAsErrors />
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.0" />
+        <PackageReference Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="1.0.*" />
+        <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
+    </ItemGroup>
+    </Project>
+    ```
+
+    Finally type:
+
+    ```sh
+    dotnet build extensions.csproj -o bin --no-incremental --packages D:\home\.nuget
+    ```
+
+    The following output is roughly expected:
+    ![dotnet console](./media/dotnet-output.png)
 
 1. Click the **Save** button (1) at the top of the code editor to save your changes. Then click **Run** (2) button to execute the code shown in the editor. Open the log panel (3) and look at the error output (4). A message like *"[...] The specified container does not exist."* is **expected** at this moment!
 
