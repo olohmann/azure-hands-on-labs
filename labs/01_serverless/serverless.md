@@ -197,8 +197,7 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
         log.LogInformation($"VisionEndpoint: {System.Environment.GetEnvironmentVariable("VisionEndpoint")}");
         log.LogInformation($"AzureWebJobsStorage: {System.Environment.GetEnvironmentVariable("AzureWebJobsStorage")}");
 
-        var array = await ToByteArrayAsync(myBlob);
-        var result = await AnalyzeImageAsync(array, log);
+        var result = await AnalyzeImageAsync(myBlob, log);
 
         log.LogInformation("Is Adult: " + result.adult.isAdultContent.ToString());
         log.LogInformation("Adult Score: " + result.adult.adultScore.ToString());
@@ -217,14 +216,14 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
         }
     }
 
-    private async static Task<ImageAnalysisInfo> AnalyzeImageAsync(byte[] bytes, ILogger log)
+    private async static Task<ImageAnalysisInfo> AnalyzeImageAsync(Stream blob, ILogger log)
     {
         HttpClient client = new HttpClient();
 
         var key = System.Environment.GetEnvironmentVariable("SubscriptionKey");
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
 
-        HttpContent payload = new ByteArrayContent(bytes);
+        HttpContent payload = new StreamContent(blob);
         payload.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/octet-stream");
 
         var endpoint = System.Environment.GetEnvironmentVariable("VisionEndpoint");
@@ -272,16 +271,6 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
         }
     }
 
-    // Converts a stream to a byte array
-    private async static Task<byte[]> ToByteArrayAsync(Stream stream)
-    {
-        Int32 length = stream.Length > Int32.MaxValue ? Int32.MaxValue : Convert.ToInt32(stream.Length);
-        byte[] buffer = new Byte[length];
-        await stream.ReadAsync(buffer, 0, length);
-        stream.Position = 0;
-        return buffer;
-    }
-
     public class ImageAnalysisInfo
     {
         public Adult adult { get; set; }
@@ -295,7 +284,7 @@ Once you have created an Azure Function App, you can add Azure Functions to it. 
         public float adultScore { get; set; }
         public float racyScore { get; set; }
     }
-    ```
+   ```
 
     ```Run``` is the method called each time the function is executed. The ```Run``` method uses a helper method named ```AnalyzeImageAsync``` to pass each blob added to the `uploaded` container to the Computer Vision API for analysis. Then it calls a helper method named ```StoreBlobWithMetadata``` to create a copy of the blob in either the `accepted` container or the `rejected` container, depending on the scores returned by ```AnalyzeImageAsync```.
 
