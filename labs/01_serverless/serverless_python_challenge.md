@@ -9,25 +9,13 @@ That is, you will create an Azure Function that monitors a blob container in Azu
 The following illustration provides an overview:
 ![Overview](./media/overview.png)
 
-## Setup your Python Environment in the Azure Shell
+## Setup your Development Environment
 
-We need to setup some CLI tooling to get you started with Azure Functions for Python. In order to keep your local environment vanilla, we are going to setup the Azure Shell for you. If you have already a local Python environment, feel free to skip this step and setup your local environment instead. You can follow [this guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-python) to do so.
+We need to setup some CLI tooling to get you started with Azure Functions for Python. Please follow [the prerequisites section in this guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-python#prerequisites) to do so. **Again, only do the prerequisites.**
 
-### Step 1: Install the Azure Functions CLI tool
+> You will likely need local admin rights to complete the setup. If you do not have admin rights, you can spin up a virtual machine (Windows or Linux) to setup the environment.
 
-1. Open the Azure Shell.
-1. Issue the following series of commands to install the Azure Functions CLI Tool (`func`):
-
-    ```sh
-    mkdir "${HOME}/.npm-packages"
-    echo 'prefix=${HOME}/.npm-packages' >> ${HOME}/.npmrc
-    echo 'NPM_PACKAGES="${HOME}/.npm-packages"' >> ${HOME}/.bashrc
-    echo 'export PATH="$NPM_PACKAGES/bin:$PATH"' >> ${HOME}/.bashrc
-    echo 'unset MANPATH' >> ${HOME}/.bashrc
-    echo 'export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"' >> ${HOME}/.bashrc
-    source ${HOME}/.bashrc
-    npm install -g azure-functions-core-tools
-    ```
+## Development Environment Validation
 
 1. Type `func`. This should print an output similar to this:
 
@@ -52,60 +40,25 @@ We need to setup some CLI tooling to get you started with Azure Functions for Py
     <... many additional lines... >
     ```
 
-### Step 2: Setup pyenv to get a dedicated local Python version
-
-1. Again, open the Azure Shell or continue working in the current instance.
-
-1. Issue the following series of commands to install [pyenv](https://github.com/pyenv/pyenv):
+1. Setup a local Python Env.
 
     ```sh
-    git clone https://github.com/pyenv/pyenv.git ${HOME}/.pyenv
-    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ${HOME}/.bashrc
-    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ${HOME}/.bashrc
-    echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ${HOME}/.bashrc
-    source ${HOME}/.bashrc
+    # In Bash
+    python3.6 -m venv .env
+    source .env/bin/activate
+
+    # In PowerShell
+    py -3.6 -m venv .env
+    .env\scripts\activate
     ```
 
-1. Type `pyenv`. The output should look like this:
-
-   ```sh
-   pyenv 1.2.9-2-g6309aaf
-   Usage: pyenv <command> [<args>]
-   ```
-
-1. Install the `virtualenv` plugin for `pyenv`:
-
-    ```sh
-    git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
-    echo 'eval "$(pyenv virtualenv-init -)"' >> ${HOME}/.bashrc
-    source ${HOME}/.bashrc
-    ```
-
-1. Now setup a local Python version 3.6.8 with venv support:
-
-    ```sh
-    pyenv install 3.6.8
-    pyenv shell 3.6.8
-    pyenv virtualenv venv368 # creates a new virtualenv from the current version
-    pyenv activate venv368
-    ```
-
-    > Everytime you fire up a new Azure Shell instance, you need to activate the environment again with `pyenv activate venv368`.
-
-2. Verify that you have the following output - especially the change in prompt (might change in future versions):
-
-    ```sh
-    pyenv-virtualenv: prompt changing will be removed from future release. configure `export PYENV_VIRTUALENV_DISABLE_PROMPT=1' to simulate the behavior.
-    (venv368) labuser01@Azure:~$
-    ```
-
-3. Type `python --version` and you should see:
+1. Type `python --version` and you should see e.g. 3.6.8 or similar:
 
     ```sh
     Python 3.6.8
     ```
 
-### Step 3: Setting up your Function Boilerplate
+### Setting up your Function Boilerplate
 
 1. Run the following commands which should start the Azure Functions CLI wizard:
 

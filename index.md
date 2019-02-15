@@ -7,7 +7,6 @@ layout: home
 ## Labs
 
 1. [Serverless with Azure Functions](./labs/01_serverless/serverless.md) 
-1. [Serverless with Azure Functions - Python Challenge](./labs/01_serverless/serverless_python_challenge.md)
 1. [Introduction to IoT on Azure](./labs/02_iot/iot.md)
 1. [Introduction to Terraform on Azure](./labs/03_terraform/terraform.md)
 1. [Introduction to Containers on Azure](./labs/04_containers_on_azure/containers_on_azure.md)

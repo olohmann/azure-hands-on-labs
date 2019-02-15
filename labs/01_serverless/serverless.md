@@ -4,7 +4,7 @@
 
 Functions have been the basic building blocks of software since the first lines of code were written and the need for code organization and reuse became a necessity. Azure Functions expand on these concepts by allowing developers to create "serverless", event-driven functions that run in the cloud and can be shared across a wide variety of services and systems, uniformly managed, and easily scaled based on demand. In addition, Azure Functions can be written in a variety of languages, including C#, JavaScript, Python, Bash, and PowerShell, and they're perfect for building apps and nanoservices that employ a compute-on-demand model.
 
-In this lab, you will create an Azure Function that monitors a blob container in Azure Storage for new images, and then performs automated analysis of the images using the Microsoft Cognitive Services [Computer Vision API](https://www.microsoft.com/cognitive-services/en-us/computer-vision-api). Specifically, The Azure Function will analyze each image that is uploaded to the container for adult or racy content and create a copy of the image in another container. Images that contain adult or racy content will be copied to one container, and images that do not contain adult or racy content will be copied to another. In addition, the scores returned by the Computer Vision API will be stored in blob metadata.
+In this lab, you will create an Azure Function that monitors a blob container in Azure Storage for new images, and then performs automated analysis of the images using the Microsoft Cognitive Services [Computer Vision API](https://www.microsoft.com/cognitive-services/en-us/computer-vision-api). Specifically, The Azure Function will analyze each image that is uploaded to the container for adult or racy content and create a copy of the image in another container. Images that contain adult or racy content will be copied to one container, and images that do not contain adult or racy content will be copied to another. In addition, the scores returned by the Computer Vision API will be stored in blob metadata. Finally, you will create an Azure Logic App to create a workflow to notify about rejected image.
 
 The following illustration provides an overview:
 ![Overview](./media/overview.png)
@@ -37,6 +37,8 @@ This hands-on lab includes the following exercises:
 - Exercise 3: Add a subscription key to application settings
 - Exercise 4: Test the Azure Function
 - Exercise 5: View blob metadata
+- Exercise 6: Use a Logic App for a custom workflow
+- Exercise 7: Challenge: Build an approval workflow
 
 Estimated time to complete this lab: **45-60** minutes.
 
@@ -491,6 +493,81 @@ In this exercise, you will use the cross-platform [Microsoft Azure Storage Explo
 
 You can probably imagine how this might be used in the real world. Suppose you were building a photo-sharing site and wanted to prevent adult images from being stored. You could easily write an Azure Function that inspects each image that is uploaded and deletes it from storage if it contains adult content.
 
+## Exercise 6: Add an Azure Logic App to Report Rejections
+
+1. Create a new Azure Logic App by using the resource creation dialog and searching for `logic`:
+
+    ![Create Logic App 1](./media/create-logic-app-1.png)
+
+1. In the creation wizard provide a custom name (1) and re-use the existing resource group (2):
+
+    ![Create Logic App 2](./media/create-logic-app-2.png)
+
+1. When the logic app has been created, open it. You will see a welcome screen and need to scroll down...
+
+    ![Create Logic App 3](./media/create-logic-app-3.png)
+
+1. ... and select 'blank logic app':
+
+    ![Create Logic App 4](./media/create-logic-app-4.png)
+
+1. In the logic app designer search for the 'When a blob is added or modified [...]' trigger:
+
+    ![Create Logic App 5](./media/create-logic-app-5.png)
+
+1. In the selection of the Azure Storage connection for that step, create a connection to the same storage account that we have been using the whole lab:
+
+    ![Create Logic App 6](./media/create-logic-app-6.png)
+
+1. Fill in the details as depicted in the screenshot:
+
+    ![Create Logic App 7](./media/create-logic-app-7.png)
+
+1. Next, we'll append an action. Search for 'Office 365 Outlook' and select it:
+
+    ![Create Logic App 8](./media/create-logic-app-8.png)
+
+1. Select 'Send an email':
+
+    ![Create Logic App 9](./media/create-logic-app-9.png)
+
+1. Press 'Sign in' and authenticate with the credentials provided by the lab instructor or you own:
+
+    ![Create Logic App 10](./media/create-logic-app-10.png)
+
+1. Again, fill in the details for this step. For the recipient mail address, please choose a mail you can verify:
+
+    ![Create Logic App 11](./media/create-logic-app-11.png)
+
+1. Hit 'Save':
+
+    ![Create Logic App 12](./media/create-logic-app-12.png)
+
+1. Upload the image `Image_03.jpg` to the `uploaded` folder. It will be processed by the Azure Function as before and will be put into the `rejected` cotntainer. There, our Azure Logic App Workflow will pick it up and will send out an email.
+
+1. You can observe the process when you go to the Overview area of the service:
+
+    ![Create Logic App 13](./media/create-logic-app-13.png)
+
+1. Eventually it should reach the 'Succeeded' state:
+
+    ![Create Logic App 14](./media/create-logic-app-14.png)
+
+1. And you should see an email in your inbox like this:
+
+    ![Create Logic App 15](./media/create-logic-app-15.png)
+
+## Exercise 7: Challenge - Build an Approval Workflow with Azure Logic Apps
+
+The last exercise in this lab is actually a challenge. Achieve the following:
+
+- Build an approval workflow
+- Images that are stored in the rejected container, trigger the creation of an approval workflow
+- Approved images are moved into the accepted container
+- Rejected images are deleted for good.
+
+> Yes, the setup that we created here is a bit over the top for this use case. But imagine how you can integrate approval workflows and other great workflow-like task into your serverless application with Azure Logic Apps.
+
 ## Summary
 
 In this hands-on lab you learned how to:
@@ -499,5 +576,6 @@ In this hands-on lab you learned how to:
 - Write an Azure Function that uses a blob trigger
 - Add application settings to an Azure Function App
 - Use Microsoft Cognitive Services to analyze images and store the results in blob metadata
+- Use Azure Logic Apps to build serverless workflows
 
 This is just one example of how you can leverage Azure Functions to automate repetitive tasks. Experiment with other Azure Function templates to learn more about Azure Functions and to identify additional ways in which they can aid your research or business.
