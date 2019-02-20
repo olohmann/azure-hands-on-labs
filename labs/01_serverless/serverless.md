@@ -17,6 +17,7 @@ In this hands-on lab, you will learn how to:
 - Write an Azure Function that uses a blob trigger
 - Add application settings to an Azure Function App
 - Use Microsoft Cognitive Services to analyze images and store the results in blob metadata
+- Use Azure Logic Apps to build serverless workflows
 
 ### Prerequisites
 
