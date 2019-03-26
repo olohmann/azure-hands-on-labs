@@ -13,6 +13,7 @@ layout: home
 1. [Introduction to Container Orchestration and AKS](./labs/05_container_orchestration_and_aks/containers_and_aks.md)
 1. [Introduction to CI/CD with Azure DevOps](./labs/06_cicd_azure_devops/cicd_azure_devops.md)
 1. [Introduction to Infrastructure as Code (IaC) for Azure](./labs/07_iac/iac.md)
+1. [Introduction to Automated Testing with Azure DevOps](./labs/08_testing/testing.md)
 
 ## Acknowledgements
 
