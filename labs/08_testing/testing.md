@@ -186,7 +186,25 @@ First, let's make sure that you can actually work with your environment.
 
 If everything worked so far, you are good to go to the next task.
 
-### Task 2: Write a UI Test for Parts Unlimited
+### Task 2: Fix Parts Unlimited JavaScript Code
 
 If not done yet, take a few moments to navigate around your personal *Parts Unlimited* website which you deployed before.
 
+1. Before we can run the first UI test, we unfortunately need to fix an issue with the JavaScript setup in the actual project. Open your command prompt (cmd) and navigate to your checked out folder:
+
+    ```text
+    cd %USERPROFILE%\PartsUnlimited\PartsUnlimited-aspnet45\src\PartsUnlimitedWebsite\Views\ShoppingCart
+    ```
+
+1. If the previous command has failed you, you put the source code to another location. Please `cd` into your directory accordingly. Then issue the following commands (you can copy and paste):
+
+    ```text
+    curl -o Index.cshtml https://gist.githubusercontent.com/olohmann/979df6f733d02ebb322d54b9c6ebdbe7/raw/36a48e3c9d3246392f377c69a7762eb6c53ac330/Index.cshtml
+    git add Index.cshtml
+    git commit -m "Fixed JavaScript issue"
+    git push
+    ```
+
+1. Now, the solution is ready for our UI tests.
+
+### Task 3: Write a UI Smoke Test and Integration into AzureDevOps
