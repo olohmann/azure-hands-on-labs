@@ -219,4 +219,22 @@ If not done yet, take a few moments to navigate around your personal *Parts Unli
 
 1. Now, the solution is ready for our UI tests.
 
-### Task 3: Write a UI Smoke Test and Integration into AzureDevOps
+### Task 3: Integrate UI Tests into the Release Pipeline
+
+1. Go to the Azure DevOps website and select *Repositories*. Hover over the pulldown menu in the top bar, to open the Git repository menu. Select *Import repository*.
+    ![UnitTests](./media/03-ui-test.png)
+
+1. In the import dialog, use the Github Repo `https://github.com/olohmann/parts-unlimited-web-driver-tests.git` as the import target and click *Import*.
+    ![UnitTests](./media/04-ui-test.png)
+
+1. In order to be able to work on the UI tests later locally, clone the newly imported repository to your local (or lab VM) environment. Same as before, use VS Code and its `git clone` command via the Command Palette.
+    ![UnitTests](./media/05-ui-test.png)
+
+1. Next we will integrate the UI tests into the release pipeline. Select the *Release* pipeline and edit it.
+    ![UnitTests](./media/06-ui-test.png)
+
+1. As we have stored our UI test code in a separate repository, the pipeline needs to be modified by adding a new artefact to it. Click the *Add+* button in the *Artefact* area.
+    ![UnitTests](./media/07-ui-test.png)
+
+1. In the Artefact dialog, select the imported repository.
+    ![UnitTests](./media/08-ui-test.png)
