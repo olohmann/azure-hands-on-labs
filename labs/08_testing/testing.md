@@ -206,14 +206,35 @@ If everything worked so far, you are good to go to the next task.
 1. In the import dialog, use the Github Repo `https://github.com/olohmann/parts-unlimited-web-driver-tests.git` as the import target and click *Import*.
     ![UnitTests](./media/04-ui-test.png)
 
-1. In order to be able to work on the UI tests later locally, clone the newly imported repository to your local (or lab VM) environment. Same as before, use VS Code and its `git clone` command via the Command Palette.
+1. In order to be able to work on the UI tests later in this lab, clone the newly imported repository to your local (or lab VM) environment. Same as before, use VS Code and its `git clone` command via the Command Palette.
+
+1. We will setup a build pipeline for the UI tests and will use the build output as the artefact that feeds into our standard release pipeline. So first, navigate to the *Builds* tab and select *New*.
     ![UnitTests](./media/05-ui-test.png)
 
-1. Next we will integrate the UI tests into the release pipeline. Select the *Release* pipeline and edit it.
+1. Follow the outlined flow from the screenshots:
     ![UnitTests](./media/06-ui-test.png)
 
-1. As we have stored our UI test code in a separate repository, the pipeline needs to be modified by adding a new artefact to it. Click the *Add+* button in the *Artefact* area.
     ![UnitTests](./media/07-ui-test.png)
 
-1. In the Artefact dialog, select the imported repository.
     ![UnitTests](./media/08-ui-test.png)
+
+    ![UnitTests](./media/09-ui-test.png)
+
+    ![UnitTests](./media/10-ui-test.png)
+
+1. By executing *Run* in the last step, a build has already triggered
+    ![UnitTests](./media/11-ui-test.png)
+
+1. When the build has finished, quickly analyze if the build process was a success or not.
+    ![UnitTests](./media/12-ui-test.png)
+
+1. Head over to the *Release* pipeline and edit it.
+    ![UnitTests](./media/12a-ui-test.png)
+
+1. Add a new artefact.
+    ![UnitTests](./media/13-ui-test.png)
+
+1. Let the new artefact have its origin in the new web-driver build.
+    ![UnitTests](./media/14-ui-test.png)
+
+### Task 3: TBD, additional test with wrapper?
