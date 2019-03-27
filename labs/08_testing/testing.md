@@ -28,7 +28,7 @@ Follow the guidelines from the instructor to either use a provided VM or your lo
 1. Install the *.NET Core Test Explorer* extension.
     ![Env](./media/02a-env.png)
 
-1. Clone the repository from the Azure DevOps project. Therefore go to [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password combination.
+1. Clone the repository from the Azure DevOps project. For that, go to [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password.
 1. You should see your assigned pre-configured project, e.g. 'Lab1User030'.
     ![Env](./media/01-az-devops.png)
 1. Go to *Repos* and select *Clone*. Copy the Git Repo URL.
@@ -39,10 +39,10 @@ Follow the guidelines from the instructor to either use a provided VM or your lo
 1. Select a destination location on the local hard drive (or just use the default in the user's home dir).
     ![Env](./media/04-env.png)
 
-1. Now, the authentication dialog for the Git Repo appears. Continue by entering your provided credentials (same as for Azure Portal and Azure DevOps).
+1. Now the authentication dialog for the Git Repo appears. Continue by entering your provided credentials (same as for Azure Portal and Azure DevOps).
     ![Env](./media/05-env.png)
 
-1. You will be prompted by VS Code, if you want to immediately open the cloned repo, select yes. You should now see the full repo.
+1. You will be prompted by VS Code whether you want to immediately open the cloned repo. Select *yes*. You should now see the full repo.
     ![Env](./media/06-env.png)
 
 1. In order to do successful commits later, you need to make sure that the git environment is configured correctly. If you are working on a fresh lab VM, open a command prompt (`Windows Key + R`, type `cmd` and press `Enter`). Issue the following two commands, replacing with your actual identities:
@@ -54,25 +54,37 @@ Follow the guidelines from the instructor to either use a provided VM or your lo
 
     ![Env](./media/07-env.png)
 
-That is it for the moment. You have now a functional local environment.
+That is it for the moment. You now have a functional local environment.
 
 ## Preparation - Azure DevOps Pipelines
 
-1. Go to the [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password combination.
+In its current state, the pipeline does not yet know the specific configuration details needed to actually deploy to your Azure subsription. We will fix this now.
+
+1. Go to the [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password.
+
 1. You should see your assigned pre-configured project, e.g. 'Lab1User030'.
     ![AzDevOps](./media/01-az-devops.png)
+
 1. Select 'Releases' in the 'Pipelines' tab.
 
     ![AzDevOps](./media/02-az-devops.png)
-1. Now 'Edit' the existing release plan.
+
+1. Click *Edit* for the existing release plan.
+
     ![AzDevOps](./media/03-az-devops.png)
-1. There are three small issues we need to fix highlighted with a red explanation mark. Start from left to right with the 'Dev' environment.
-    ![AzDevOps](./media/04-az-devops.png)
-1. But first, we need to change a pipeline-wide variable that defines the resource group target for the deployment. Open the variables tab.
+
+1. First we need to change a pipeline-wide variable that defines the resource group target for the deployment. Open the variables tab.
+
     ![AzDevOps](./media/05-az-devops.png)
 
-1. And change `ResourceGroupName` to e.g. `CONTOSO_RG_LAB_030` (whatever resource group was assigned to you).
+1. Change `ResourceGroupName` to e.g. `CONTOSO_RG_LAB_030` (whatever resource group was assigned to you).
+
+1. There are additional settings needed for each of the three stages ('Dev', 'QA' and 'Production'), which is why all three are currently marked with a red explanation mark. Start from left to right with the 'Dev' environment and perform the following steps for each of them.
+
+    ![AzDevOps](./media/04-az-devops.png)
+
 1. Now select the the `Dev` stage in the `Tasks` panel.
+
     ![AzDevOps](./media/06-az-devops.png)
 
 1. Modify the `Azure Subscription` to use the first available `Service Connection`. Do **not** select the subscription when you were assigned a dedicated resource group.
