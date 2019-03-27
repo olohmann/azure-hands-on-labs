@@ -137,11 +137,27 @@ Unit tests are part of every good build pipeline. In this exercise we will force
 
 1. Open the file `ProductSearchTests.cs` and modify a test case as depicted in the screenshot to trigger a failing unit test:
 
-    ![AzDevOps](./media/01-unit-tests.png)
+    ![UnitTests](./media/01-unit-tests.png)
 
 1. Commit your changes.
 
-    ![AzDevOps](./media/02-unit-tests.png)
+    ![UnitTests](./media/02-unit-tests.png)
+
+1. Push the changes to your central git repo in Azure DevOps. To do so, press the *sync button* in the status bar.
+
+    ![UnitTests](./media/03-unit-tests.png)
+
+1. Go to your browser and open the *Build* pipeline. You should now see *Continuous Integration* in action. That is, the push to the central repo that you just committed, triggered an automatic build.
+
+    ![UnitTests](./media/04-unit-tests.png)
+
+1. As expected, the build won't succeed this time as the modified unit test fails. Review the status in the build summary.
+    ![UnitTests](./media/05-unit-tests.png)
+
+1. Also observe, that no deployment has been performed - which is actually the whole reason behind our automated test and failure detection.
+    ![UnitTests](./media/06-unit-tests.png)
+
+1. Now put everything back to normal by modifying the test code again (back to the good state), commit and push.
 
 ## Exercise 3: Release Pipeline and UI Tests
 
