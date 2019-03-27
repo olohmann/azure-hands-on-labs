@@ -22,8 +22,11 @@ Follow the guidelines from the instructor to either use a provided VM or your lo
 1. Open Visual Studio Code.
     ![Env](./media/01-env.png)
 
-1. Install the C# extension.
+1. Install the *C#* extension.
     ![Env](./media/02-env.png)
+
+1. Install the *.NET Core Test Explorer* extension.
+    ![Env](./media/02a-env.png)
 
 1. Clone the repository from the Azure DevOps project. Therefore go to [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password combination.
 1. You should see your assigned pre-configured project, e.g. 'Lab1User030'.
@@ -157,8 +160,33 @@ Unit tests are part of every good build pipeline. In this exercise we will force
 1. Also observe, that no deployment has been performed - which is actually the whole reason behind our automated test and failure detection.
     ![UnitTests](./media/06-unit-tests.png)
 
-1. Now put everything back to normal by modifying the test code again (back to the good state), commit and push.
+1. Now put everything back to normal by modifying the test code again (back to the good state), commit and push. Here you'll observe the CD pipeline kicking in again.
+
+    ![UnitTests](./media/07-unit-tests.png)
 
 ## Exercise 3: Release Pipeline and UI Tests
 
-1. TODO: Describe the UI Test stuff.
+### Task 1: Run a UI Test Locally
+
+First, let's make sure that you can actually work with your environment.
+
+1. Open a new Visual Studio Code instance/window.
+
+1. Git clone `https://github.com/olohmann/selenium-dotnet-core-hello-world.git`.
+
+1. Open the repository when prompted.
+
+1. Run the *build* task.
+    ![UnitTests](./media/01-ui-test.png)
+
+1. Open the Test Explorer tab. Navigate down to the actual test and press the play button.
+    ![UnitTests](./media/02-ui-test.png)
+
+1. A Chrome instance should be opened and text should be entered automatically as stated in the UI test.
+
+If everything worked so far, you are good to go to the next task.
+
+### Task 2: Write a UI Test for Parts Unlimited
+
+If not done yet, take a few moments to navigate around your personal *Parts Unlimited* website which you deployed before.
+
