@@ -282,7 +282,7 @@ We could create such tests from scratch, that would directly work with the eleme
 1. As our UI tests are .Net Core based, we need to change the build host to `Hosted 2017`.
     ![UnitTests](./media/16-ui-test.png)
 
-1. Next, add a new *.NET Core* step. I needs to be configured like this (also below a yaml configuration is listed to allow copy pasting into the textboxes)
+1. Next, add a new *.NET Core* step. It needs to be configured like this (also below a yaml configuration is listed to allow copy pasting into the textboxes)
 
     ![UnitTests](./media/17-ui-test.png)
 
@@ -294,11 +294,12 @@ We could create such tests from scratch, that would directly work with the eleme
         command: custom
         custom: vstest
         arguments: 'PartsUnlimited.WebDriverTests.dll /ResultsDirectory:$(System.DefaultWorkingDirectory) /logger:trx'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/_PartsUnlimited-UI-Tests/drop'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/_parts-unlimited-web-driver-tests/drop'
     continueOnError: true
    ```
 
 1. Finally, add a *Publish Test Results* step.
+
     ![UnitTests](./media/18-ui-test.png)
 
    ```yaml
@@ -312,18 +313,27 @@ We could create such tests from scratch, that would directly work with the eleme
         testRunTitle: 'UI Tests'
     ```
 
-1. Now go ahead, and change the build host in the other environments (QA, Dev). Don't include the UI tests yet, this is if time allows, something that can be done later.
+1. Now change the build host in the other environments (QA, Dev). Don't include the UI tests yet, this is if time allows, something that can be done later.
+
     ![UnitTests](./media/19-ui-test.png)
 
-1. Before we are done, we need to provide the tests a couple of environment variable so that the UI tests can actually identify the target of the tests. Add a `TestTargetUrl` variable per environment, and a `TestWebDriverName` with `ChromeHeadless` for the complete release pipeline.
+1. Before we are done, we need to provide two environment variables:
+
+    * For the UI tests to be able to actually identify the target of the tests (obviously, the dev stage will listen at another url than prod or QA), add a `TestTargetUrl` variable per each stage.
+    * Additionally, the tests are written in a way that allows us to specify which browser (web driver) should be used. The variable for this is `TestWebDriverName` and it should have the value `ChromeHeadless`, to make sure that the tests run without trying to interact with a UI (which we do not have in the pipeline anyways). That variable should be set for the complete release pipeline.
+
+    This makes four variables in total, as depicted in the following screenshot.
+
     ![UnitTests](./media/21-ui-test.png)
 
-1. Save the progress.
+1. Save our work.
+
     ![UnitTests](./media/20-ui-test.png)
 
-1. Run a deployment.
+1. Run a deployment (by creating a new release).
+
     ![UnitTests](./media/22-ui-test.png)
 
-1. Look at the test results.
+1. Examine the test results.
 
-### Task 3: TBD, additional test with wrapper?
+### Task 3: Extra Challenge: Create your own test with Page Objects
