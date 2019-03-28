@@ -87,7 +87,7 @@ In its current state, the pipeline does not yet know the specific configuration 
 
     ![AzDevOps](./media/05-az-devops.png)
 
-1. Change `ResourceGroupName` to e.g. `CONTOSO_RG_LAB_030` (whatever resource group was assigned to you).
+1. Change `ResourceGroupName` to the resource group name that was provided for you, e.g. `CONTOSO_RG_LAB_030` (Carefully look up the name, do not copy it from here!).
 
 1. There are additional settings needed for each of the three stages ('Dev', 'QA' and 'Production'), which is why all three are currently marked with a red exclamation mark. We will start from left to right and fix all of them.
 
@@ -154,7 +154,7 @@ After finishing the boring preparation work, let's do our first end-to-end deplo
 
 1. The configured automation does not stop here! Actually, there is some continuous delivery magic configured that will trigger a *Release* pipeline for every successful build that happens in the *Build* pipeline. The *Release* pipeline will pick up the artifacts from the latest build and deploy it into the *Dev*, *QA* and *Production* environments. Actually, it will not only deploy our app - it even creates all the needed resources like a database and an app service from scratch (as explained in the previous CI/CD and IaC labs (click [here](./../../index.md) for an overview).
 
-    In the menu on the left, select `Releases` (below `Pipelines`).
+    In the menu on the left, select *Releases* (below *Pipelines*).
 
     ![AzDevOps](./media/19-az-devops.png)
 
@@ -162,13 +162,15 @@ After finishing the boring preparation work, let's do our first end-to-end deplo
 
     ![AzDevOps](./media/20-az-devops.png)
 
+    > In case you get an error like "Failed to check the resource group status", the resource group name you provided in the previous exercise was probably not correct and you need to fix it in the *Variables* of the Release Pipeline.
+
 1. Once everything ran successful you should see something like in the following picture.
 
     > **Note**: You do not need to wait for all stages to finish. You can go ahead with the next steps once `Dev` has successfully deployed. On the other hand, in case you are interested in details, you might as well open one of the environments and look at the logs streaming in.
 
     ![AzDevOps](./media/21-az-devops.png)
 
-1. Now head over to the Azure Portal. You will see the Azure resources in your resource group that were just created by the `Dev` stage of your pipeline.
+1. Now head over to the Azure Portal (open [https://portal.azure.com](https://portal.azure.com) and log in if needed). You will see the Azure resources in your resource group that were just created by the `Dev` stage of your pipeline. In case you cannot find your resource group, simply enter its name into the search bar at the top of the portal.
 
     ![AzDevOps](./media/22-az-devops.png)
 
