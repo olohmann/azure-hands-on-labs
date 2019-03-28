@@ -332,7 +332,7 @@ We could create such tests from scratch, that would directly work with the eleme
     * For the UI tests to be able to actually identify the target of the tests (obviously, the dev stage will listen at another url than prod or QA), add a `TestTargetUrl` variable per each stage.
     * Additionally, the tests are written in a way that allows us to specify which browser (web driver) should be used. The variable for this is `TestWebDriverName` and it should have the value `ChromeHeadless`, to make sure that the tests run without trying to interact with a UI (which we do not have in the pipeline anyways). That variable should be set for the complete release pipeline.
 
-    > In case you are interested in how the tests pick up those settings, please see the code in class [WebDriverProvider](https://github.com/olohmann/parts-unlimited-web-driver-tests/blob/2ed06762e22a5df7cbb7b9098a56b77623f1d31f/TestApi/WebDriverProvider.cs#L23).
+    > Azure Pipelines automatically injects pipeline and stage variables into the steps at run-time as simple environment variables (see [the docs](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/variables?view=azure-devops&tabs=batch#using-default-variables)). In case you are interested in how the tests pick up those settings, please see the code in class [WebDriverProvider](https://github.com/olohmann/parts-unlimited-web-driver-tests/blob/2ed06762e22a5df7cbb7b9098a56b77623f1d31f/TestApi/WebDriverProvider.cs#L23).
 
     This makes four variables in total, as depicted in the following screenshot.
 
