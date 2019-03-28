@@ -20,29 +20,40 @@ Depending on your lab environment, a pre-configured Virtual Machine might be ava
 Follow the guidelines from the instructor to either use a provided VM or your local environment with the outlined prerequisites.
 
 1. Open Visual Studio Code.
+ 
     ![Env](./media/01-env.png)
 
 1. Install the *C#* extension.
+
     ![Env](./media/02-env.png)
 
 1. Install the *.NET Core Test Explorer* extension.
+
     ![Env](./media/02a-env.png)
 
 1. Clone the repository from the Azure DevOps project. For that, go to [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password.
 1. You should see your assigned pre-configured project, e.g. 'Lab1User030'.
+
     ![Env](./media/01-az-devops.png)
+
 1. Go to *Repos* and select *Clone*. Copy the Git Repo URL.
+
     ![Env](./media/03-env.png)
+
 1. In Visual Studio Code, open the Command Palette (View -> Command Palette or `CTRL-Shift-P`) and type `git clone`. Paste the copied git repo URL from Azure DevOps.
+
     ![Env](./media/04-env.png)
 
 1. Select a destination location on the local hard drive (or just use the default in the user's home dir).
+
     ![Env](./media/04-env.png)
 
 1. Now the authentication dialog for the Git Repo appears. Continue by entering your provided credentials (same as for Azure Portal and Azure DevOps).
+
     ![Env](./media/05-env.png)
 
 1. You will be prompted by VS Code whether you want to immediately open the cloned repo. Select *yes*. You should now see the full repo.
+
     ![Env](./media/06-env.png)
 
 1. In order to do successful commits later, you need to make sure that the git environment is configured correctly. If you are working on a fresh lab VM, open a command prompt (`Windows Key + R`, type `cmd` and press `Enter`). Issue the following two commands, replacing with your actual identities:
@@ -56,16 +67,16 @@ Follow the guidelines from the instructor to either use a provided VM or your lo
 
 That is it for the moment. You now have a functional local environment.
 
-## Preparation - Azure DevOps Pipelines
+## Exercise 1.1: Update the Pre-Configured Azure DevOps Project
 
 In its current state, the pipeline does not yet know the specific configuration details needed to actually deploy to your Azure subsription. We will fix this now.
 
 1. Go to the [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password.
 
-1. You should see your assigned pre-configured project, e.g. 'Lab1User030'.
+1. You should see your assigned pre-configured project, e.g. *Lab1User030*.
     ![AzDevOps](./media/01-az-devops.png)
 
-1. Select 'Releases' in the 'Pipelines' tab.
+1. Select *Releases* in the *Pipelines* tab.
 
     ![AzDevOps](./media/02-az-devops.png)
 
@@ -83,46 +94,57 @@ In its current state, the pipeline does not yet know the specific configuration 
 
     ![AzDevOps](./media/04-az-devops.png)
 
-1. First select the the `Dev` stage in the `Tasks` tab.
+1. First select the the *Dev* stage in the *Tasks* tab.
 
     ![AzDevOps](./media/06-az-devops.png)
 
-1. Modify the `Azure Subscription` to use the first available `Service Connection`. Do **not** select the subscription when you were assigned a dedicated resource group.
+1. Modify the *Azure Subscription* to use the first available *Service Connection*. Do **not** select a subscription, if you have been provided with a dedicated resource group.
+
     ![AzDevOps](./media/07-az-devops.png)
 
 1. Update the location to, e.g. `West Europe` (stick to this for all environments).
+
     ![AzDevOps](./media/08-az-devops.png)
 
-1. Now switch to the second step `Azure App Service Deploy`.
+1. Now switch to the second step *Azure App Service Deploy*.
+
     ![AzDevOps](./media/09-az-devops.png)
 
-1. Also fix the `Azure Subscription` setting as before and enter `Dev` in the slot setting.
+1. Also fix the *Azure Subscription* setting as before and enter `Dev` in the slot setting.
+
     ![AzDevOps](./media/10-az-devops.png)
 
     > **Beware!** We are using [slots](https://docs.microsoft.com/en-us/azure/app-service/deploy-staging-slots) as actual stages in this lab for reasons of simplicity. For **real** pipelines this is **not recommended** as discussed [here](https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/app-service-web-app/basic-web-app#deployment) and [here](https://devblogs.microsoft.com/devops/considerations-on-using-deployment-slots-in-your-devops-pipeline/). Instead, you would be using one App Service Plan per stage and use a "Staging" or "Warmup" slot per stage. This way, stages are isolated but structurally equivalent as they should always be. 
 
-1. Switch to the `QA` task now. Apply exactly the same config as before, except for the slot name. Here you will enter `Staging`.
+1. Switch to the *QA* task now. Apply exactly the same config as before, except for the slot name. Here you will enter `Staging`.
+
     ![AzDevOps](./media/11-az-devops.png)
     ![AzDevOps](./media/12-az-devops.png)
 
-1. Finally, head over to the `Production` task. Repeat the config updates from before. Note, this time you don't have to enter a slot setting as the default slot is the production slot.
+1. Finally, head over to the *Production* task. Repeat the config updates from before. Note, this time you don't have to enter a slot setting as the default slot is the production slot.
 
-1. Save all your changes. If the Save button is still grayed out, you missed an error and need to fix it. In the popup that appears you can enter any descriptive message.
+1. Save all your changes. If the Save button is still grayed out, you missed an error and need to fix it.
+
     ![AzDevOps](./media/13-az-devops.png)
+
+1. In the appearing save dialog popup you can enter any descriptive message.
+
     ![AzDevOps](./media/14-az-devops.png)
 
-## Exercise 1: Full Deployment Run-Through
+## Exercise 1.2: Full Deployment
 
 After finishing the boring preparation work, let's do our first end-to-end deployment!
 
-1. Switch to the `Build` pipeline. You will notice that no build has been running so far. The build pipeline is configured to run whenever a git check-in happens. As we never committed code so far... no builds!
+1. Switch to the *Build* pipeline. You will notice that no build has been running so far. The build pipeline is configured to run whenever a git check-in happens. As we never committed code so far... no builds!
+
     ![AzDevOps](./media/15-az-devops.png)
 
-1. Before actually doing code changes, let us run a build by manually scheduling one. Click on `Queue`.
+1. Before actually doing code changes, let us run a build by manually scheduling one. Click on *Queue*.
 
     ![AzDevOps](./media/16-az-devops.png)
 
 1. Keep all the defaults and confirm.
+
     ![AzDevOps](./media/17-az-devops.png)
 
 1. You can follow the progress by selecting the scheduled build. After a short while the logs from the agent are streamed to your browser session:
@@ -133,7 +155,7 @@ After finishing the boring preparation work, let's do our first end-to-end deplo
 
 1. The configured automation does not stop here! Actually, there is some continuous delivery magic configured that will trigger a *Release* pipeline for every successful build that happens in the *Build* pipeline. The *Release* pipeline will pick up the artifacts from the latest build and deploy it into the *Dev*, *QA* and *Production* environments. Actually, it will not only deploy our app - it even creates all the needed resources like a database and an app service from scratch (as explained in the previous CI/CD and IaC labs (click [here](./../../index.md) for an overview).
 
-    In the menu on the left, select `Releases` (below `Pipelines`). 
+    In the menu on the left, select `Releases` (below `Pipelines`).
 
     ![AzDevOps](./media/19-az-devops.png)
 
@@ -346,6 +368,10 @@ We could create such tests from scratch, that would directly work with the eleme
 
     ![UnitTests](./media/22-ui-test.png)
 
-1. Examine the test results.
+1. Examine the test results. They should look very cheerfully - 4/4 green!
+
+    ![UnitTests](./media/23-ui-test.png)
 
 ### Task 3: Extra Challenge: Create your own test with Page Objects
+
+Now you have all the bits and pieces put together to start with something exploratory. Feel free to dig into the *Parts Unlimited* website and create an additional UI test, leveraging the and extending the *PageObject* infrastructure.
