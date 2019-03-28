@@ -232,9 +232,59 @@ If everything worked so far, you are good to go to the next task.
     ![UnitTests](./media/12a-ui-test.png)
 
 1. Add a new artefact.
+
     ![UnitTests](./media/13-ui-test.png)
 
 1. Let the new artefact have its origin in the new web-driver build.
     ![UnitTests](./media/14-ui-test.png)
+
+1. Now open the task list for the Dev environment.
+    ![UnitTests](./media/15-ui-test.png)
+
+1. As our UI tests are .Net Core based, we need to change the build host to `Hosted 2017`.
+    ![UnitTests](./media/16-ui-test.png)
+
+1. Next, add a new *.NET Core* step. I needs to be configured like this (also below a yaml configuration is listed to allow copy pasting into the textboxes)
+    ![UnitTests](./media/17-ui-test.png)
+
+   ```yaml
+   steps:
+    - task: DotNetCoreCLI@2
+    displayName: 'dotnet custom'
+    inputs:
+        command: custom
+        custom: vstest
+        arguments: 'PartsUnlimited.WebDriverTests.dll /ResultsDirectory:$(System.DefaultWorkingDirectory) /logger:trx'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/_PartsUnlimited-UI-Tests/drop'
+    continueOnError: true
+   ```
+
+1. Finally, add a *Publish Test Results* step.
+    ![UnitTests](./media/18-ui-test.png)
+
+   ```yaml
+   steps:
+    - task: PublishTestResults@2
+    displayName: 'Publish Test Results **/*.trx'
+    inputs:
+        testResultsFormat: VSTest
+        testResultsFiles: '**/*.trx'
+        failTaskOnFailedTests: true
+        testRunTitle: 'UI Tests'
+    ```
+
+1. Now go ahead, and change the build host in the other environments (QA, Dev). Don't include the UI tests yet, this is if time allows, something that can be done later.
+    ![UnitTests](./media/19-ui-test.png)
+
+1. Before we are done, we need to provide the tests a couple of environment variable so that the UI tests can actually identify the target of the tests. Add a `TestTargetUrl` variable per environment, and a `TestWebDriverName` with `ChromeHeadless` for the complete release pipeline.
+    ![UnitTests](./media/21-ui-test.png)
+
+1. Save the progress.
+    ![UnitTests](./media/20-ui-test.png)
+
+1. Run a deployment.
+    ![UnitTests](./media/22-ui-test.png)
+
+1. Look at the test results.
 
 ### Task 3: TBD, additional test with wrapper?
