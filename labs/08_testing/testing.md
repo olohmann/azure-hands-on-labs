@@ -119,33 +119,48 @@ After finishing the boring preparation work, let's do our first end-to-end deplo
     ![AzDevOps](./media/15-az-devops.png)
 
 1. Before actually doing code changes, let us run a build by manually scheduling one. Click on `Queue`.
+
     ![AzDevOps](./media/16-az-devops.png)
 
 1. Keep all the defaults and confirm.
     ![AzDevOps](./media/17-az-devops.png)
 
 1. You can follow the progress by selecting the scheduled build. After a short while the logs from the agent are streamed to your browser session:
+
     ![AzDevOps](./media/18-az-devops.png)
 
-1. The configured automation does not stop here! Actually, there is some continuous delivery magic configured here. It will trigger the *Release* pipeline for every successful build that happens in the *Build* pipeline. In the *Release* pipeline, it will deploy the latest build into the *Dev*, *QA* and *Production* environment.
+1. When the build finishes, you should see a summary page, in which you can click  `Artifacts` at the top right to see the actual artifacts our build produced - in this case the artifact is called "drop" and contains the deployment package for our website.
+
+1. The configured automation does not stop here! Actually, there is some continuous delivery magic configured that will trigger a *Release* pipeline for every successful build that happens in the *Build* pipeline. The *Release* pipeline will pick up the artifacts from the latest build and deploy it into the *Dev*, *QA* and *Production* environments. Actually, it will not only deploy our app - it even creates all the needed resources like a database and an app service from scratch (as explained in the previous CI/CD and IaC labs (click [here](./../../index.md) for an overview).
+
+    In the menu on the left, select `Releases` (below `Pipelines`). 
+
     ![AzDevOps](./media/19-az-devops.png)
 
-1. Click on the scheduled release and observe the pipeline update. You should see a deployment activity being executed.
+1. Click on the scheduled release (e.g. named "Release-1") and observe the pipeline update. You should see a deployment activity being executed.
+
     ![AzDevOps](./media/20-az-devops.png)
 
-1. Once everything ran successful you should see the following picture.
+1. Once everything ran successful you should see something like in the following picture.
+
+    > **Note**: You do not need to wait for all stages to finish. You can go ahead with the next steps once `Dev` has successfully deployed. On the other hand, in case you are interested in details, you might as well open one of the environments and look at the logs streaming in.
+
     ![AzDevOps](./media/21-az-devops.png)
 
-1. Now head over to the Azure Portal. You will see the Azure resources in your resource group.
+1. Now head over to the Azure Portal. You will see the Azure resources in your resource group that were just created by the `Dev` stage of your pipeline.
+
     ![AzDevOps](./media/22-az-devops.png)
 
 1. Select the `Dev` slot of the deployed web app.
+
     ![AzDevOps](./media/23-az-devops.png)
 
 1. In the details, look for the assigned URL and navigate to it. Please note the little `-dev` suffix attached to the hostname. This is the differentiation between the *Slots* that you have configured previously.
+
     ![AzDevOps](./media/24-az-devops.png)
 
 1. You should now see our great *Parts Unlimited* Web Shop experience.
+
     ![AzDevOps](./media/25-az-devops.png)
 
 ## Exercise 2: Unit Tests
