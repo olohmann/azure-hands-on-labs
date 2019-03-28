@@ -212,18 +212,25 @@ First, let's make sure that you can actually work with your environment.
 1. Open the repository when prompted.
 
 1. Run the *build* task.
+
     ![UnitTests](./media/01-ui-test.png)
 
 1. Open the Test Explorer tab. Navigate down to the actual test and press the play button.
+
     ![UnitTests](./media/02-ui-test.png)
 
 1. A Chrome instance should be opened and text should be entered automatically as stated in the UI test.
 
 If everything worked so far, you are good to go to the next task.
 
-### Task 2: Integrate UI Tests into the Release Pipeline
+### Task 2: Integrate End-To-End (E2E) Tests into the Release Pipeline
 
-1. Go to the Azure DevOps website and select *Repositories*. Hover over the pulldown menu in the top bar, to open the Git repository menu. Select *Import repository*.
+For our pipeline we will need tests that interact with our PartsUnlimited websites by automating a browser, thereby executing the full system end-to-end from the UI down to the database. This kind of tests typically only sees the UI end of the system though (everything behind that is a black box to them), which is why we often call them "UI Tests" synonymously.
+
+We could create such tests from scratch, that would directly work with the elements in the website, just like we did in the previous task. However, such tests become unmaintainable quickly, which is why we would like to use the [Page Object Pattern](https://www.martinfowler.com/bliki/PageObject.html). Creating the code for such Page Objects is not complicated but would take a while doing it from scratch, thus we import an existing example from a github repository into our Azure DevOps project.
+
+1. Go to the Azure DevOps website and select *Repositories*. Hover over the pulldown menu in the top bar to open the Git repository menu. Select *Import repository*.
+
     ![UnitTests](./media/03-ui-test.png)
 
 1. In the import dialog, use the Github Repo `https://github.com/olohmann/parts-unlimited-web-driver-tests.git` as the import target and click *Import*.
@@ -231,10 +238,14 @@ If everything worked so far, you are good to go to the next task.
 
 1. In order to be able to work on the UI tests later in this lab, clone the newly imported repository to your local (or lab VM) environment. Same as before, use VS Code and its `git clone` command via the Command Palette.
 
-1. We will setup a build pipeline for the UI tests and will use the build output as the artefact that feeds into our standard release pipeline. So first, navigate to the *Builds* tab and select *New*.
+1. We will set up a build pipeline for the UI tests. Fortnately, the build is also already preconfigured in the repository we just cloned (in [this yaml file](https://github.com/olohmann/parts-unlimited-web-driver-tests/blob/master/build.yaml)). We will use the output of this build as the artifact that feeds into the release pipeline we already used before.
+
+    First, navigate to the *Builds* tab and select *New*.
+
     ![UnitTests](./media/05-ui-test.png)
 
 1. Follow the outlined flow from the screenshots:
+
     ![UnitTests](./media/06-ui-test.png)
 
     ![UnitTests](./media/07-ui-test.png)
@@ -245,20 +256,24 @@ If everything worked so far, you are good to go to the next task.
 
     ![UnitTests](./media/10-ui-test.png)
 
-1. By executing *Run* in the last step, a build has already triggered
+1. By executing *Run* in the last step, a build has already been triggered
+
     ![UnitTests](./media/11-ui-test.png)
 
 1. When the build has finished, quickly analyze if the build process was a success or not.
+
     ![UnitTests](./media/12-ui-test.png)
 
 1. Head over to the *Release* pipeline and edit it.
+
     ![UnitTests](./media/12a-ui-test.png)
 
-1. Add a new artefact.
+1. Add a new artifact.
 
     ![UnitTests](./media/13-ui-test.png)
 
-1. Let the new artefact have its origin in the new web-driver build.
+1. Let the new artifact have its origin in the new web-driver build.
+
     ![UnitTests](./media/14-ui-test.png)
 
 1. Now open the task list for the Dev environment.
@@ -268,6 +283,7 @@ If everything worked so far, you are good to go to the next task.
     ![UnitTests](./media/16-ui-test.png)
 
 1. Next, add a new *.NET Core* step. I needs to be configured like this (also below a yaml configuration is listed to allow copy pasting into the textboxes)
+
     ![UnitTests](./media/17-ui-test.png)
 
    ```yaml
