@@ -69,12 +69,13 @@ That is it for the moment. You now have a functional local environment.
 
 In its current state, the pipeline does not yet know the specific configuration details needed to actually deploy to your Azure subsription. We will fix this now.
 
-1. Go to the [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) and sign in with your provided username and password.
+1. Return to your Azure DevOps project (in case you are lost, go to the [Azure DevOps Start Page](https://azure.microsoft.com/en-us/services/devops/) again and sign in with your provided username and password).
 
 1. You should see your assigned pre-configured project, e.g. *Lab1User030*.
+
     ![AzDevOps](./media/01-az-devops.png)
 
-1. Select *Releases* in the *Pipelines* tab.
+1. In the menu on the left, select *Pipelines*, *Releases*.
 
     ![AzDevOps](./media/02-az-devops.png)
 
@@ -88,7 +89,7 @@ In its current state, the pipeline does not yet know the specific configuration 
 
 1. Change `ResourceGroupName` to e.g. `CONTOSO_RG_LAB_030` (whatever resource group was assigned to you).
 
-1. There are additional settings needed for each of the three stages ('Dev', 'QA' and 'Production'), which is why all three are currently marked with a red explanation mark. We will start from left to right and fix all of them.
+1. There are additional settings needed for each of the three stages ('Dev', 'QA' and 'Production'), which is why all three are currently marked with a red exclamation mark. We will start from left to right and fix all of them.
 
     ![AzDevOps](./media/04-az-devops.png)
 
@@ -96,11 +97,11 @@ In its current state, the pipeline does not yet know the specific configuration 
 
     ![AzDevOps](./media/06-az-devops.png)
 
-1. Modify the *Azure Subscription* to use the first available *Service Connection*. Do **not** select a subscription, if you have been provided with a dedicated resource group.
+1. Click on the first step *Azure Deployment* and modify the *Azure Subscription* to use the first available *Service Connection*. Do **not** select a subscription if you have been provided with a dedicated resource group.
 
     ![AzDevOps](./media/07-az-devops.png)
 
-1. Update the location to, e.g. `West Europe` (stick to this for all environments).
+1. Update the location to `West Europe`.
 
     ![AzDevOps](./media/08-az-devops.png)
 
@@ -149,7 +150,7 @@ After finishing the boring preparation work, let's do our first end-to-end deplo
 
     ![AzDevOps](./media/18-az-devops.png)
 
-1. When the build finishes, you should see a summary page, in which you can click  `Artifacts` at the top right to see the actual artifacts our build produced - in this case the artifact is called "drop" and contains the deployment package for our website.
+1. When the build finishes, you should see a summary page, in which you can click  `Artifacts` at the top right to see the actual artifacts our build produced. In this case the artifact is called "drop" and contains the deployment package for our website.
 
 1. The configured automation does not stop here! Actually, there is some continuous delivery magic configured that will trigger a *Release* pipeline for every successful build that happens in the *Build* pipeline. The *Release* pipeline will pick up the artifacts from the latest build and deploy it into the *Dev*, *QA* and *Production* environments. Actually, it will not only deploy our app - it even creates all the needed resources like a database and an app service from scratch (as explained in the previous CI/CD and IaC labs (click [here](./../../index.md) for an overview).
 
