@@ -46,11 +46,9 @@ Follow the guidelines from the instructor to either use a provided VM or your lo
 
 1. Select a destination location on the local hard drive (or just use the default in the user's home dir).
 
-    ![Env](./media/04-env.png)
+    ![Env](./media/05-env.png)
 
 1. Now the authentication dialog for the Git Repo appears. Continue by entering your provided credentials (same as for Azure Portal and Azure DevOps).
-
-    ![Env](./media/05-env.png)
 
 1. You will be prompted by VS Code whether you want to immediately open the cloned repo. Select *yes*. You should now see the full repo.
 
