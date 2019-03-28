@@ -167,11 +167,13 @@ After finishing the boring preparation work, let's do our first end-to-end deplo
 
 Unit tests are part of every good build pipeline. In this exercise we will forcefully create a failing build via a failing unit test and correct it again. This will give you some idea about the guardrails that unit test bring to an automation pipeline.
 
-1. Switch to Visual Studio Code. As preparation you should already have checked out the source code of the Parts Unlimited solution. If not, please do so now.
+1. Switch to Visual Studio Code. As preparation you should already have checked out the source code (cloned the git repository) of the Parts Unlimited solution. If not, please do so now.
 
 1. Open the file `ProductSearchTests.cs` and modify a test case as depicted in the screenshot to trigger a failing unit test:
 
     ![UnitTests](./media/01-unit-tests.png)
+
+    > The test verifies that the search returns at least one product matching the search term "proDuct 1" and we purposefully change it to expect "Product BUG", which breaks the test.
 
 1. Commit your changes.
 
@@ -186,12 +188,14 @@ Unit tests are part of every good build pipeline. In this exercise we will force
     ![UnitTests](./media/04-unit-tests.png)
 
 1. As expected, the build won't succeed this time as the modified unit test fails. Review the status in the build summary.
+
     ![UnitTests](./media/05-unit-tests.png)
 
-1. Also observe, that no deployment has been performed - which is actually the whole reason behind our automated test and failure detection.
+1. Also observe that no deployment has been performed - which is actually the whole reason behind our automated test and failure detection: If something breaks we do not want it to propagate to the next stage.
+
     ![UnitTests](./media/06-unit-tests.png)
 
-1. Now put everything back to normal by modifying the test code again (back to the good state), commit and push. Here you'll observe the CD pipeline kicking in again.
+1. Now put everything back to normal by modifying the test code again (back to the good state), commit and push. Here you'll observe the CD pipeline kicking in again, because now all tests should be green.
 
     ![UnitTests](./media/07-unit-tests.png)
 
