@@ -221,6 +221,16 @@ First, let's make sure that you can actually work with your environment.
 
 1. A Chrome instance should be opened and text should be entered automatically as stated in the UI test.
 
+1. Later on, in our release pipeline, the tests will need to run without a desktop. There will thus be no way of launching actual browser windows. Instead, we need to run the test in "headless" mode, meaning exactly this: without a UI. Fortunately, the Chrome browser has built-in support for running headless. Let's see how that works.
+
+    In the test code, locate this line and uncomment it:
+
+    ```c#
+    //options.AddArgument("--headless");
+    ```
+
+1. Run the test again. You will be seeing test results, but no browser comes up - *chromedriver.exe* and *chrome.exe* simply run in the background, with all the browser engine and scripting in action just as if the browser window was visible. This allows for running very realistic tests without the hassle of having to provide an actual interactive desktop.
+
 If everything worked so far, you are good to go to the next task.
 
 ### Task 2: Integrate End-To-End (E2E) Tests into the Release Pipeline
