@@ -79,11 +79,11 @@ In its current state, the pipeline does not yet know the specific configuration 
 
 1. Change `ResourceGroupName` to e.g. `CONTOSO_RG_LAB_030` (whatever resource group was assigned to you).
 
-1. There are additional settings needed for each of the three stages ('Dev', 'QA' and 'Production'), which is why all three are currently marked with a red explanation mark. Start from left to right with the 'Dev' environment and perform the following steps for each of them.
+1. There are additional settings needed for each of the three stages ('Dev', 'QA' and 'Production'), which is why all three are currently marked with a red explanation mark. We will start from left to right and fix all of them.
 
     ![AzDevOps](./media/04-az-devops.png)
 
-1. Now select the the `Dev` stage in the `Tasks` panel.
+1. First select the the `Dev` stage in the `Tasks` tab.
 
     ![AzDevOps](./media/06-az-devops.png)
 
@@ -99,11 +99,15 @@ In its current state, the pipeline does not yet know the specific configuration 
 1. Also fix the `Azure Subscription` setting as before and enter `Dev` in the slot setting.
     ![AzDevOps](./media/10-az-devops.png)
 
-1. Switch to the `QA` task now. Apply exactly the same config as before, except for the slot setting. Here you will enter `Staging`.
+    > **Beware!** We are using [slots](https://docs.microsoft.com/en-us/azure/app-service/deploy-staging-slots) as actual stages in this lab for reasons of simplicity. For **real** pipelines this is **not recommended** as discussed [here](https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/app-service-web-app/basic-web-app#deployment) and [here](https://devblogs.microsoft.com/devops/considerations-on-using-deployment-slots-in-your-devops-pipeline/). Instead, you would be using one App Service Plan per stage and use a "Staging" or "Warmup" slot per stage. This way, stages are isolated but structurally equivalent as they should always be. 
+
+1. Switch to the `QA` task now. Apply exactly the same config as before, except for the slot name. Here you will enter `Staging`.
     ![AzDevOps](./media/11-az-devops.png)
     ![AzDevOps](./media/12-az-devops.png)
 
-1. Finally, head over to the `Production` task. Repeat the config updates from before. Note, this time you don't have to enter a slot setting as the default slot is the production slot. Save all your changes. If the Save button is still grayed out, you missed an error and need to fix it. In the popup that appears you can enter any descriptive message.
+1. Finally, head over to the `Production` task. Repeat the config updates from before. Note, this time you don't have to enter a slot setting as the default slot is the production slot.
+
+1. Save all your changes. If the Save button is still grayed out, you missed an error and need to fix it. In the popup that appears you can enter any descriptive message.
     ![AzDevOps](./media/13-az-devops.png)
     ![AzDevOps](./media/14-az-devops.png)
 
