@@ -234,7 +234,7 @@ First, let's make sure that you can actually work with your environment.
 
 1. Open the repository when prompted.
 
-1. Run the *build* task.
+1. Run the *build* task, choose "build" when asked for a task to run.
 
     ![UnitTests](./media/01-ui-test.png)
 
@@ -260,7 +260,7 @@ If everything worked so far, you are good to go to the next task.
 
 For our pipeline we will need tests that interact with our PartsUnlimited websites by automating a browser, thereby executing the full system end-to-end from the UI down to the database. This kind of tests typically only sees the UI end of the system though (everything behind that is a black box to them), which is why we often call them "UI Tests" synonymously.
 
-We could create such tests from scratch, that would directly work with the elements in the website, just like we did in the previous task. However, such tests become unmaintainable quickly, which is why we would like to use the [Page Object Pattern](https://www.martinfowler.com/bliki/PageObject.html). Creating the code for such Page Objects is not complicated but would take a while doing it from scratch, thus we import an existing example from a github repository into our Azure DevOps project.
+We could create such tests from scratch - tests that directly work with the elements in the website, just like we did in the previous task. However, this kind of tests becomes unmaintainable quickly, which is why we would like to use the [Page Object Pattern](https://www.martinfowler.com/bliki/PageObject.html). Creating the code for Page Objects is not complicated but would take a while doing it from scratch, thus we import an existing example from a github repository into our Azure DevOps project.
 
 1. Go to the Azure DevOps website and select *Repositories*. Hover over the pulldown menu in the top bar to open the Git repository menu. Select *Import repository*.
 
@@ -312,7 +312,8 @@ We could create such tests from scratch, that would directly work with the eleme
 1. Now open the task list for the Dev environment.
     ![UnitTests](./media/15-ui-test.png)
 
-1. As our UI tests are .Net Core based, we need to change the build host to `Hosted 2017`.
+1. As our UI tests are .Net Core based, we need to change the build host to `Hosted 2017.
+
     ![UnitTests](./media/16-ui-test.png)
 
 1. Next, add a new *.NET Core* step. It needs to be configured like this (also below a yaml configuration is listed to allow copy pasting into the textboxes)
@@ -330,6 +331,8 @@ We could create such tests from scratch, that would directly work with the eleme
         workingDirectory: '$(System.DefaultWorkingDirectory)/_parts-unlimited-web-driver-tests/drop'
     continueOnError: true
    ```
+
+1. In the *.NET Core* step you just added, expand "Advanced" and enter the value from the YAML above for the *Working Directory": `$(System.DefaultWorkingDirectory)/_parts-unlimited-web-driver-tests/drop`, which is the location where our test DLL from the build artifact will be found at run time.
 
 1. Finally, add a *Publish Test Results* step.
 
@@ -369,10 +372,35 @@ We could create such tests from scratch, that would directly work with the eleme
 
     ![UnitTests](./media/22-ui-test.png)
 
-1. Examine the test results. They should look very cheerfully - 4/4 green!
+1. Wait for the first stage of the pipeline to finish.
+
+    > In case you see errors, click on them to see the full log. There you might find something like *The test source file "D:\a\r1\a\PartsUnlimited.WebDriverTests.dll" provided was not found.*. Then probably you forgot to specify the WorkingDirectory in the .NET Core task in the previous task. Check all the settings of the task and repeat.
+
+1. Then, in the summary page for the stage, click *Tests* and examine the test results. They should look very cheerfully - 4/4 green!
 
     ![UnitTests](./media/23-ui-test.png)
 
 ### Task 3: Extra Challenge: Create your own test with Page Objects
 
 Now you have all the bits and pieces put together to start with something exploratory. Feel free to dig into the *Parts Unlimited* website and create an additional UI test, leveraging the and extending the *PageObject* infrastructure.
+
+* Start by adding a skeleton for a new test:
+
+    ```c#
+        [TestMethod]
+        public void MyNewTest()
+        {
+            using (var dw = WebDriverProvider.CreateDriverWrapper(TestContext))
+            {
+                new HomePage(dw.Driver)
+                    // Enter test logic here
+            }
+        }
+    ```
+* Things you might want to try:
+    * Use existing page objects in new combinations to explore new scenarios.
+    * Add new methods to existing page objects (e.g. for enabling functionality that is in the product but not included in the page objects yet)
+    * Add entirely new page object classes for pages of the application that were not yet explored by page objects.
+    * Navigate to your live PartsUnlimted site and use the devoloper tools (F12 tools) of your browser to locate elements in the page and figure out ways how our page objects might find them (e.g. to be able to use `driver.FindElement(By.Id(""))` we would need to have an element that actually has an id set).
+
+> Page Objects should not be created in advance but only once we encouter a test that needs something additional. This way we never waste effort on page objects that will not be needed anyways.
